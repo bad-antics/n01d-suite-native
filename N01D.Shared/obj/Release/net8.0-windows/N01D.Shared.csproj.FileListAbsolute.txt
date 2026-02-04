@@ -1,0 +1,15 @@
+W:\misc workspaces\blackflag\n01d-suite-native\N01D.Shared\bin\Release\net8.0-windows\N01D.Shared.deps.json
+W:\misc workspaces\blackflag\n01d-suite-native\N01D.Shared\bin\Release\net8.0-windows\N01D.Shared.dll
+W:\misc workspaces\blackflag\n01d-suite-native\N01D.Shared\bin\Release\net8.0-windows\N01D.Shared.pdb
+W:\misc workspaces\blackflag\n01d-suite-native\N01D.Shared\obj\Release\net8.0-windows\Themes\N01DTheme.baml
+W:\misc workspaces\blackflag\n01d-suite-native\N01D.Shared\obj\Release\net8.0-windows\N01D.Shared_MarkupCompile.cache
+W:\misc workspaces\blackflag\n01d-suite-native\N01D.Shared\obj\Release\net8.0-windows\N01D.Shared.g.resources
+W:\misc workspaces\blackflag\n01d-suite-native\N01D.Shared\obj\Release\net8.0-windows\N01D.Shared.GeneratedMSBuildEditorConfig.editorconfig
+W:\misc workspaces\blackflag\n01d-suite-native\N01D.Shared\obj\Release\net8.0-windows\N01D.Shared.AssemblyInfoInputs.cache
+W:\misc workspaces\blackflag\n01d-suite-native\N01D.Shared\obj\Release\net8.0-windows\N01D.Shared.AssemblyInfo.cs
+W:\misc workspaces\blackflag\n01d-suite-native\N01D.Shared\obj\Release\net8.0-windows\N01D.Shared.csproj.CoreCompileInputs.cache
+W:\misc workspaces\blackflag\n01d-suite-native\N01D.Shared\obj\Release\net8.0-windows\N01D.Shared.sourcelink.json
+W:\misc workspaces\blackflag\n01d-suite-native\N01D.Shared\obj\Release\net8.0-windows\N01D.Shared.dll
+W:\misc workspaces\blackflag\n01d-suite-native\N01D.Shared\obj\Release\net8.0-windows\refint\N01D.Shared.dll
+W:\misc workspaces\blackflag\n01d-suite-native\N01D.Shared\obj\Release\net8.0-windows\N01D.Shared.pdb
+W:\misc workspaces\blackflag\n01d-suite-native\N01D.Shared\obj\Release\net8.0-windows\ref\N01D.Shared.dll

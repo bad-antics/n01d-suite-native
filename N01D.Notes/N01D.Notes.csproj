@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>N01D-Notes</AssemblyName>
+    <RootNamespace>N01D.Notes</RootNamespace>
+    <Version>1.0.0</Version>
+    <Authors>bad-antics</Authors>
+    <Description>N01D Notes - Markdown note-taking with live preview and hacker aesthetics</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Markdig" Version="0.37.0" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2592.51" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\N01D.Shared\N01D.Shared.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "dgSpecHash": "7l6/WiQr0qU=",
+  "success": true,
+  "projectFilePath": "W:\\misc workspaces\\blackflag\\n01d-suite-native\\N01D.Notes\\N01D.Notes.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\pc123\\.nuget\\packages\\markdig\\0.37.0\\markdig.0.37.0.nupkg.sha512",
+    "C:\\Users\\pc123\\.nuget\\packages\\microsoft.web.webview2\\1.0.2592.51\\microsoft.web.webview2.1.0.2592.51.nupkg.sha512",
+    "C:\\Users\\pc123\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.22\\microsoft.netcore.app.ref.8.0.22.nupkg.sha512",
+    "C:\\Users\\pc123\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.22\\microsoft.windowsdesktop.app.ref.8.0.22.nupkg.sha512",
+    "C:\\Users\\pc123\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.22\\microsoft.aspnetcore.app.ref.8.0.22.nupkg.sha512",
+    "C:\\Users\\pc123\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\8.0.22\\microsoft.netcore.app.host.win-x64.8.0.22.nupkg.sha512"
+  ],
+  "logs": []
+}

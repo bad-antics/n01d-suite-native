@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>N01D-Term</AssemblyName>
+    <RootNamespace>N01D.Term</RootNamespace>
+    <Version>1.0.0</Version>
+    <Authors>bad-antics</Authors>
+    <Description>N01D Terminal - Modern terminal emulator with tabs and hacker aesthetics</Description>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\N01D.Shared\N01D.Shared.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>N01D-SysMon</AssemblyName>
+    <RootNamespace>N01D.SysMon</RootNamespace>
+    <Version>1.0.0</Version>
+    <Authors>bad-antics</Authors>
+    <Description>N01D System Monitor - Real-time system monitoring with hacker aesthetics</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Management" Version="8.0.0" />
+    <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.0-rc2" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\N01D.Shared\N01D.Shared.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>N01D-Media</AssemblyName>
+    <RootNamespace>N01D.Media</RootNamespace>
+    <Version>1.0.0</Version>
+    <Authors>bad-antics</Authors>
+    <Description>N01D Media - Universal Media Suite: Video, Audio, Image Editor, PDF Viewer</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\N01D.Shared\N01D.Shared.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="LibVLCSharp" Version="3.8.5" />
+    <PackageReference Include="LibVLCSharp.WPF" Version="3.8.5" />
+    <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.20" />
+  </ItemGroup>
+</Project>

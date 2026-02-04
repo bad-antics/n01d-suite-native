@@ -1,0 +1,253 @@
+<Window x:Class="N01D.Media.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vlc="clr-namespace:LibVLCSharp.WPF;assembly=LibVLCSharp.WPF"
+        Title="N01D Media" 
+        Height="750" Width="1100"
+        WindowStartupLocation="CenterScreen"
+        Background="#0D0D0D"
+        AllowDrop="True"
+        Drop="Window_Drop"
+        DragOver="Window_DragOver"
+        KeyDown="Window_KeyDown">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header with Tabs -->
+        <Border Grid.Row="0" Background="#1A1A1A" BorderBrush="#FF0055" BorderThickness="0,0,0,2" Padding="10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <TextBlock Text="[" Foreground="#FF0055" FontFamily="Consolas" FontSize="18"/>
+                    <TextBlock Text=" N01D " Foreground="#0ABDC6" FontFamily="Consolas" FontSize="18" FontWeight="Bold"/>
+                    <TextBlock Text="::" Foreground="#00FF41" FontFamily="Consolas" FontSize="18"/>
+                    <TextBlock Text=" MEDIA " Foreground="#FF0055" FontFamily="Consolas" FontSize="18" FontWeight="Bold"/>
+                    <TextBlock Text="]" Foreground="#FF0055" FontFamily="Consolas" FontSize="18"/>
+                </StackPanel>
+
+                <!-- Mode Tabs -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button x:Name="btnVideoMode" Content="VIDEO" Click="BtnVideoMode_Click" Margin="5,0"
+                           Background="#FF0055" Foreground="White" BorderBrush="#FF0055"
+                           Padding="20,8" FontFamily="Consolas" FontWeight="Bold" Cursor="Hand"/>
+                    <Button x:Name="btnAudioMode" Content="AUDIO" Click="BtnAudioMode_Click" Margin="5,0"
+                           Background="#1A1A1A" Foreground="#0ABDC6" BorderBrush="#0ABDC6"
+                           Padding="20,8" FontFamily="Consolas" FontWeight="Bold" Cursor="Hand"/>
+                    <Button x:Name="btnImageMode" Content="IMAGE" Click="BtnImageMode_Click" Margin="5,0"
+                           Background="#1A1A1A" Foreground="#00FF41" BorderBrush="#00FF41"
+                           Padding="20,8" FontFamily="Consolas" FontWeight="Bold" Cursor="Hand"/>
+                    <Button x:Name="btnPdfMode" Content="PDF" Click="BtnPdfMode_Click" Margin="5,0"
+                           Background="#1A1A1A" Foreground="#FFAA00" BorderBrush="#FFAA00"
+                           Padding="20,8" FontFamily="Consolas" FontWeight="Bold" Cursor="Hand"/>
+                </StackPanel>
+
+                <Button x:Name="btnOpen" Grid.Column="2" Content="OPEN" Click="BtnOpen_Click"
+                       Background="#1A1A1A" Foreground="#00FF41" BorderBrush="#00FF41"
+                       Padding="15,8" FontFamily="Consolas" FontWeight="Bold" Cursor="Hand"/>
+            </Grid>
+        </Border>
+
+        <!-- Main Content Area -->
+        <Grid Grid.Row="1">
+            <!-- Video Player -->
+            <Grid x:Name="videoPanel" Visibility="Visible">
+                <vlc:VideoView x:Name="videoView" Background="#0D0D0D"/>
+                <TextBlock x:Name="txtVideoOverlay" 
+                          Text="Drop video file or click OPEN"
+                          HorizontalAlignment="Center" VerticalAlignment="Center"
+                          Foreground="#808080" FontFamily="Consolas" FontSize="16"
+                          Visibility="Visible"/>
+            </Grid>
+
+            <!-- Audio Player -->
+            <Grid x:Name="audioPanel" Visibility="Collapsed" Background="#0D0D0D">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                
+                <!-- Waveform / Visualization -->
+                <Border Grid.Row="0" Background="#1A1A1A" Margin="50">
+                    <Grid>
+                        <Canvas x:Name="waveformCanvas"/>
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <TextBlock x:Name="txtAudioTitle" Text="No audio loaded" 
+                                      Foreground="#0ABDC6" FontFamily="Consolas" FontSize="24" 
+                                      HorizontalAlignment="Center" TextWrapping="Wrap"/>
+                            <TextBlock x:Name="txtAudioArtist" Text="" 
+                                      Foreground="#808080" FontFamily="Consolas" FontSize="14" 
+                                      HorizontalAlignment="Center" Margin="0,10,0,0"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Playlist -->
+                <Border Grid.Row="1" Background="#1A1A1A" MaxHeight="200">
+                    <ListBox x:Name="lstPlaylist" Background="Transparent" 
+                            Foreground="#E0E0E0" FontFamily="Consolas" BorderThickness="0"
+                            SelectionChanged="LstPlaylist_SelectionChanged"/>
+                </Border>
+            </Grid>
+
+            <!-- Image Viewer/Editor -->
+            <Grid x:Name="imagePanel" Visibility="Collapsed" Background="#0D0D0D">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <Border Grid.Column="0" Background="#1A1A1A" Margin="10">
+                    <Image x:Name="imgDisplay" Stretch="Uniform"/>
+                </Border>
+
+                <!-- Image Edit Tools -->
+                <Border Grid.Column="1" Background="#1A1A1A" Width="200" Padding="10">
+                    <StackPanel>
+                        <TextBlock Text="EDIT TOOLS" Foreground="#00FF41" FontFamily="Consolas" 
+                                  FontWeight="Bold" Margin="0,0,0,15"/>
+                        
+                        <TextBlock Text="Brightness" Foreground="#E0E0E0" FontFamily="Consolas" FontSize="11"/>
+                        <Slider x:Name="sliderBrightness" Minimum="-100" Maximum="100" Value="0"
+                               ValueChanged="ImageSlider_ValueChanged"/>
+                        
+                        <TextBlock Text="Contrast" Foreground="#E0E0E0" FontFamily="Consolas" FontSize="11" Margin="0,10,0,0"/>
+                        <Slider x:Name="sliderContrast" Minimum="-100" Maximum="100" Value="0"
+                               ValueChanged="ImageSlider_ValueChanged"/>
+                        
+                        <TextBlock Text="Saturation" Foreground="#E0E0E0" FontFamily="Consolas" FontSize="11" Margin="0,10,0,0"/>
+                        <Slider x:Name="sliderSaturation" Minimum="-100" Maximum="100" Value="0"
+                               ValueChanged="ImageSlider_ValueChanged"/>
+                        
+                        <Separator Background="#333333" Margin="0,15"/>
+                        
+                        <TextBlock Text="FILTERS" Foreground="#0ABDC6" FontFamily="Consolas" 
+                                  FontWeight="Bold" Margin="0,0,0,10"/>
+                        
+                        <Button Content="Grayscale" Click="BtnGrayscale_Click" Margin="0,5"
+                               Background="#1A1A1A" Foreground="#E0E0E0" BorderBrush="#333333"
+                               Padding="10,5" FontFamily="Consolas" Cursor="Hand"/>
+                        <Button Content="Invert" Click="BtnInvert_Click" Margin="0,5"
+                               Background="#1A1A1A" Foreground="#E0E0E0" BorderBrush="#333333"
+                               Padding="10,5" FontFamily="Consolas" Cursor="Hand"/>
+                        <Button Content="Sepia" Click="BtnSepia_Click" Margin="0,5"
+                               Background="#1A1A1A" Foreground="#E0E0E0" BorderBrush="#333333"
+                               Padding="10,5" FontFamily="Consolas" Cursor="Hand"/>
+                        <Button Content="Reset" Click="BtnResetImage_Click" Margin="0,15,0,5"
+                               Background="#FF0055" Foreground="White" BorderBrush="#FF0055"
+                               Padding="10,5" FontFamily="Consolas" FontWeight="Bold" Cursor="Hand"/>
+                        
+                        <Separator Background="#333333" Margin="0,15"/>
+                        
+                        <Button Content="SAVE IMAGE" Click="BtnSaveImage_Click"
+                               Background="#00FF41" Foreground="#0D0D0D" BorderBrush="#00FF41"
+                               Padding="10,8" FontFamily="Consolas" FontWeight="Bold" Cursor="Hand"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- PDF Viewer -->
+            <Grid x:Name="pdfPanel" Visibility="Collapsed" Background="#0D0D0D">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="200"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- Page Thumbnails -->
+                <Border Grid.Column="0" Background="#1A1A1A">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Text="PAGES" Foreground="#FFAA00" FontFamily="Consolas" 
+                                  FontWeight="Bold" Padding="10"/>
+                        <ListBox x:Name="lstPdfPages" Grid.Row="1" Background="Transparent" 
+                                Foreground="#E0E0E0" FontFamily="Consolas" BorderThickness="0"
+                                SelectionChanged="LstPdfPages_SelectionChanged"/>
+                    </Grid>
+                </Border>
+
+                <!-- PDF Content -->
+                <Border Grid.Column="1" Background="#2A2A2A" Margin="10">
+                    <ScrollViewer x:Name="pdfScrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                        <Image x:Name="pdfPageImage" Stretch="None"/>
+                    </ScrollViewer>
+                </Border>
+            </Grid>
+        </Grid>
+
+        <!-- Media Controls -->
+        <Border Grid.Row="2" Background="#1A1A1A" Padding="15">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Progress Bar -->
+                <Grid Grid.Row="0" Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock x:Name="txtCurrentTime" Grid.Column="0" Text="00:00" 
+                              Foreground="#808080" FontFamily="Consolas" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <Slider x:Name="sliderProgress" Grid.Column="1" VerticalAlignment="Center"
+                           PreviewMouseDown="SliderProgress_PreviewMouseDown"
+                           PreviewMouseUp="SliderProgress_PreviewMouseUp"/>
+                    <TextBlock x:Name="txtDuration" Grid.Column="2" Text="00:00" 
+                              Foreground="#808080" FontFamily="Consolas" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                </Grid>
+
+                <!-- Control Buttons -->
+                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button x:Name="btnPrevious" Content="PREV" Click="BtnPrevious_Click" Margin="5,0"
+                           Background="#1A1A1A" Foreground="#808080" BorderBrush="#333333"
+                           Padding="15,8" FontFamily="Consolas" Cursor="Hand"/>
+                    <Button x:Name="btnStop" Content="STOP" Click="BtnStop_Click" Margin="5,0"
+                           Background="#1A1A1A" Foreground="#FF0055" BorderBrush="#FF0055"
+                           Padding="15,8" FontFamily="Consolas" Cursor="Hand"/>
+                    <Button x:Name="btnPlayPause" Content="PLAY" Click="BtnPlayPause_Click" Margin="5,0"
+                           Background="#00FF41" Foreground="#0D0D0D" BorderBrush="#00FF41"
+                           Padding="25,8" FontFamily="Consolas" FontWeight="Bold" Cursor="Hand"/>
+                    <Button x:Name="btnNext" Content="NEXT" Click="BtnNext_Click" Margin="5,0"
+                           Background="#1A1A1A" Foreground="#808080" BorderBrush="#333333"
+                           Padding="15,8" FontFamily="Consolas" Cursor="Hand"/>
+                    
+                    <Separator Width="20" Background="Transparent"/>
+                    
+                    <TextBlock Text="VOL" Foreground="#808080" FontFamily="Consolas" VerticalAlignment="Center" Margin="10,0,5,0"/>
+                    <Slider x:Name="sliderVolume" Width="100" Minimum="0" Maximum="100" Value="80"
+                           VerticalAlignment="Center" ValueChanged="SliderVolume_ValueChanged"/>
+                    
+                    <Button x:Name="btnFullscreen" Content="[  ]" Click="BtnFullscreen_Click" Margin="15,0,0,0"
+                           Background="#1A1A1A" Foreground="#0ABDC6" BorderBrush="#0ABDC6"
+                           Padding="10,8" FontFamily="Consolas" Cursor="Hand"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Status Bar -->
+        <Border Grid.Row="3" Background="#0D0D0D" Padding="10,5" BorderBrush="#333333" BorderThickness="0,1,0,0">
+            <Grid>
+                <TextBlock x:Name="txtStatus" Text="[ READY ]" Foreground="#00FF41" FontFamily="Consolas" FontSize="11"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <TextBlock x:Name="txtFileInfo" Text="" Foreground="#808080" FontFamily="Consolas" FontSize="11" Margin="0,0,20,0"/>
+                    <TextBlock Text="N01D Media v1.0.0 | bad-antics" Foreground="#808080" FontFamily="Consolas" FontSize="11"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
