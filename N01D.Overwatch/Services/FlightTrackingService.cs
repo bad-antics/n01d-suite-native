@@ -291,7 +291,7 @@ namespace N01D.Overwatch.Services
         /// <summary>
         /// Classifies how significant a tracked aircraft is — high-value assets get elevated severity.
         /// </summary>
-        private static SeverityLevel ClassifyFlightSeverity(string callsign, string aircraftType)
+        public static SeverityLevel ClassifyFlightSeverity(string callsign, string aircraftType)
         {
             var cs = callsign.ToUpperInvariant();
             // Critical — strategic / nuclear C2 / stealth
@@ -316,6 +316,10 @@ namespace N01D.Overwatch.Services
                 return SeverityLevel.Medium;
             return SeverityLevel.Low;
         }
+
+        /// <summary>Convenience overload accepting a FlightData object.</summary>
+        public static SeverityLevel ClassifyFlightSeverity(FlightData f) =>
+            ClassifyFlightSeverity(f.Callsign, f.AircraftType);
 
         public ConflictEvent? ToConflictEvent(FlightData flight)
         {
