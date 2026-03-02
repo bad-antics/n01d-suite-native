@@ -21,10 +21,13 @@ namespace N01D.Overwatch
         private readonly ShipTrackingService _ships = new();
         private readonly OilPriceService _oil = new();
         private readonly AlertService _alerts = new();
+        private readonly EclipseService _eclipse = new();
+        private readonly MissileDefenseService _missiles = new();
 
         private readonly ObservableCollection<EventViewModel> _timelineItems = new();
         private readonly List<ConflictEvent> _allEvents = new();
         private DispatcherTimer? _autoRefreshTimer;
+        private DispatcherTimer? _eclipseTimer;
         private bool _isLoading;
         private bool _initialized;
 
@@ -33,9 +36,12 @@ namespace N01D.Overwatch
             InitializeComponent();
             lstTimeline.ItemsSource = _timelineItems;
             LoadAlertRules();
+            LoadEclipseData();
+            LoadMissileDefenseData();
             _initialized = true;
             Loaded += async (_, _) => await RefreshAllAsync();
             InitMap();
+            StartEclipseCountdown();
         }
 
         // ═══════════════════════════════════════════
@@ -491,6 +497,11 @@ namespace N01D.Overwatch
 
                 // ─── Heatmap density circles ───
                 webMap.CoreWebView2?.ExecuteScriptAsync($"updateHeatmap([{markers}])");
+
+                // ─── Missile sites, defense systems, eclipse paths ───
+                UpdateMapMissiles();
+                UpdateMapDefense();
+                UpdateMapEclipses();
             }
             catch { }
         }
@@ -624,6 +635,9 @@ namespace N01D.Overwatch
                     <label class="layer-toggle"><input type="checkbox" id="togZones" checked onchange="toggleLayer('zones')"> 🎯 Strategic Zones</label>
                     <label class="layer-toggle"><input type="checkbox" id="togBases" checked onchange="toggleLayer('bases')"> 🏴 Military Bases</label>
                     <label class="layer-toggle"><input type="checkbox" id="togPipelines" checked onchange="toggleLayer('pipelines')"> 🛢 Oil Routes</label>
+                    <label class="layer-toggle"><input type="checkbox" id="togMissiles" checked onchange="toggleLayer('missiles')"> 🚀 Missile Sites</label>
+                    <label class="layer-toggle"><input type="checkbox" id="togDefense" checked onchange="toggleLayer('defense')"> 🛡 Air Defense</label>
+                    <label class="layer-toggle"><input type="checkbox" id="togEclipse" onchange="toggleLayer('eclipse')"> 🌑 Eclipse Paths</label>
                     <label class="layer-toggle"><input type="checkbox" id="togHeatmap" onchange="toggleLayer('heatmap')"> 🔥 Event Density</label>
                 </div>
 
@@ -633,6 +647,8 @@ namespace N01D.Overwatch
                     <div class="stat-row"><span>Events plotted:</span><span class="stat-val" id="statEvents">0</span></div>
                     <div class="stat-row"><span>Aircraft tracked:</span><span class="stat-val" id="statFlights">0</span></div>
                     <div class="stat-row"><span>Critical zones:</span><span class="stat-val" id="statZones" style="color:#EE3333">5</span></div>
+                    <div class="stat-row"><span>Missile sites:</span><span class="stat-val" id="statMissiles" style="color:#FF8833">0</span></div>
+                    <div class="stat-row"><span>Defense systems:</span><span class="stat-val" id="statDefense" style="color:#33CCCC">0</span></div>
                     <div class="stat-row"><span>Coverage area:</span><span class="stat-val">3.2M km²</span></div>
                 </div>
 
@@ -648,6 +664,9 @@ namespace N01D.Overwatch
                     <div class="legend-item"><span class="legend-dot" style="background:#33CC33"></span> Military Base</div>
                     <div class="legend-item"><span class="legend-line" style="border-color:#DDCC33"></span> Oil Route</div>
                     <div class="legend-item"><span class="legend-line" style="border-color:#EE3333"></span> Chokepoint</div>
+                    <div class="legend-item"><span class="legend-dot" style="background:#FF5555"></span> 🚀 Missile Site</div>
+                    <div class="legend-item"><span class="legend-dot" style="background:#33CCCC;border:2px solid #33CCCC;width:6px;height:6px"></span> 🛡 Air Defense</div>
+                    <div class="legend-item"><span class="legend-line" style="border-color:#DDCC33;border-top-style:dotted"></span> Eclipse Path</div>
                 </div>
 
                 <script>
@@ -678,6 +697,9 @@ namespace N01D.Overwatch
                     var zoneLayer = L.layerGroup().addTo(map);
                     var baseLayer = L.layerGroup().addTo(map);
                     var pipelineLayer = L.layerGroup().addTo(map);
+                    var missileLayer = L.layerGroup().addTo(map);
+                    var defenseLayer = L.layerGroup().addTo(map);
+                    var eclipseLayer = L.layerGroup();
                     var heatmapLayer = L.layerGroup();
 
                     var layers = {
@@ -686,6 +708,9 @@ namespace N01D.Overwatch
                         zones: zoneLayer,
                         bases: baseLayer,
                         pipelines: pipelineLayer,
+                        missiles: missileLayer,
+                        defense: defenseLayer,
+                        eclipse: eclipseLayer,
                         heatmap: heatmapLayer
                     };
 
@@ -956,6 +981,166 @@ namespace N01D.Overwatch
                     }
 
                     // ═══════════════════════════════════════
+                    //  MISSILE SITES (called from C#)
+                    // ═══════════════════════════════════════
+
+                    function updateMissiles(data) {
+                        missileLayer.clearLayers();
+                        var count = 0;
+
+                        data.forEach(function(m) {
+                            count++;
+
+                            // Range circle
+                            if (m.range > 0) {
+                                L.circle([m.lat, m.lon], {
+                                    radius: m.range * 1000,
+                                    color: m.color,
+                                    fillColor: m.color,
+                                    fillOpacity: 0.03,
+                                    weight: 1,
+                                    dashArray: '6,4',
+                                    opacity: 0.4,
+                                    interactive: false
+                                }).addTo(missileLayer);
+                            }
+
+                            // Missile site marker
+                            var msIcon = L.divIcon({
+                                className: 'missile-marker',
+                                html: '<div style="width:12px;height:12px;background:' + m.color + '88;border:2px solid ' + m.color + ';border-radius:50%;box-shadow:0 0 8px ' + m.color + '44" title="' + m.name + '"></div>',
+                                iconSize: [12, 12], iconAnchor: [6, 6]
+                            });
+                            var marker = L.marker([m.lat, m.lon], { icon: msIcon });
+
+                            var popupHtml = '<div class="event-popup">' +
+                                '<div class="popup-header" style="background:' + m.color + '22;color:' + m.color + ';border-bottom:1px solid ' + m.color + '44">' +
+                                m.icon + ' ' + m.name + '</div>' +
+                                '<div class="popup-body">' +
+                                '<div style="margin-bottom:6px">' +
+                                '<span class="sev-badge" style="background:' + m.color + '44;color:' + m.color + ';border:1px solid ' + m.color + '66">' + m.type + '</span>' +
+                                '</div>' +
+                                '<div>' + m.desc + '</div>' +
+                                '<div style="margin-top:6px;font-size:10px;color:#33CCCC">Missiles: ' + m.missiles + '</div>' +
+                                '<div style="font-size:10px;color:#FF8833">Range: ' + m.range + ' km</div>' +
+                                (m.underground ? '<div style="font-size:10px;color:#AA55FF">⛰ UNDERGROUND FACILITY</div>' : '') +
+                                '<div class="meta">' + m.country + ' — ' + m.operator + '</div>' +
+                                '<div class="meta">Lat: ' + m.lat.toFixed(3) + ' | Lon: ' + m.lon.toFixed(3) + '</div>' +
+                                '</div></div>';
+
+                            marker.bindPopup(popupHtml, { maxWidth: 400, className: 'dark-popup' });
+                            missileLayer.addLayer(marker);
+                        });
+
+                        document.getElementById('statMissiles').textContent = count;
+                    }
+
+                    // ═══════════════════════════════════════
+                    //  AIR DEFENSE SYSTEMS (called from C#)
+                    // ═══════════════════════════════════════
+
+                    function updateDefense(data) {
+                        defenseLayer.clearLayers();
+                        var count = 0;
+
+                        data.forEach(function(d) {
+                            count++;
+
+                            // Defense coverage circle
+                            L.circle([d.lat, d.lon], {
+                                radius: d.range * 1000,
+                                color: d.color,
+                                fillColor: d.color,
+                                fillOpacity: 0.04,
+                                weight: 1.5,
+                                dashArray: '4,4',
+                                opacity: 0.5
+                            }).addTo(defenseLayer);
+
+                            // Defense site marker (shield shaped)
+                            var defIcon = L.divIcon({
+                                className: 'defense-marker',
+                                html: '<div style="font-size:14px;text-shadow:0 0 6px ' + d.color + '80" title="' + d.name + '">🛡</div>',
+                                iconSize: [16, 16], iconAnchor: [8, 8]
+                            });
+                            var marker = L.marker([d.lat, d.lon], { icon: defIcon });
+
+                            var popupHtml = '<div class="event-popup">' +
+                                '<div class="popup-header" style="background:' + d.color + '22;color:' + d.color + ';border-bottom:1px solid ' + d.color + '44">' +
+                                '🛡 ' + d.name + '</div>' +
+                                '<div class="popup-body">' +
+                                '<div style="margin-bottom:6px">' +
+                                '<span class="sev-badge" style="background:' + d.color + '44;color:' + d.color + ';border:1px solid ' + d.color + '66">' + d.system + '</span>' +
+                                ' <span style="color:#6A6A80;font-size:10px">' + d.type + '</span>' +
+                                '</div>' +
+                                '<div>' + d.desc + '</div>' +
+                                '<div style="font-size:10px;color:#33CCCC;margin-top:6px">Engagement range: ' + d.range + ' km</div>' +
+                                '<div class="meta">' + d.country + '</div>' +
+                                '<div class="meta">Lat: ' + d.lat.toFixed(3) + ' | Lon: ' + d.lon.toFixed(3) + '</div>' +
+                                '</div></div>';
+
+                            marker.bindPopup(popupHtml, { maxWidth: 380, className: 'dark-popup' });
+                            defenseLayer.addLayer(marker);
+                        });
+
+                        document.getElementById('statDefense').textContent = count;
+                    }
+
+                    // ═══════════════════════════════════════
+                    //  ECLIPSE PATHS (called from C#)
+                    // ═══════════════════════════════════════
+
+                    function updateEclipses(data) {
+                        eclipseLayer.clearLayers();
+
+                        data.forEach(function(e) {
+                            if (e.coords.length < 2) return;
+
+                            // Eclipse path line
+                            var path = L.polyline(e.coords, {
+                                color: e.color,
+                                weight: 3,
+                                dashArray: '8,4',
+                                opacity: 0.7
+                            });
+
+                            // Path shadow (wider, transparent)
+                            L.polyline(e.coords, {
+                                color: e.color,
+                                weight: 40,
+                                opacity: 0.05,
+                                interactive: false
+                            }).addTo(eclipseLayer);
+
+                            var popupHtml = '<div class="event-popup">' +
+                                '<div class="popup-header" style="background:' + e.color + '22;color:' + e.color + ';border-bottom:1px solid ' + e.color + '44">' +
+                                '🌑 ' + e.name + '</div>' +
+                                '<div class="popup-body">' +
+                                '<div style="margin-bottom:6px">' +
+                                '<span class="sev-badge" style="background:#DDCC3344;color:#DDCC33;border:1px solid #DDCC3366">ECLIPSE</span>' +
+                                ' <span style="color:#6A6A80;font-size:10px">' + e.date + '</span>' +
+                                '</div>' +
+                                '<div>' + e.desc + '</div>' +
+                                '<div style="margin-top:6px;font-size:10px;color:#FF8833">⚔ ' + e.milSig + '</div>' +
+                                '<div class="meta">Magnitude: ' + e.mag.toFixed(3) + ' | ME Coverage: ' + e.coverage + '%</div>' +
+                                '</div></div>';
+
+                            path.bindPopup(popupHtml, { maxWidth: 400, className: 'dark-popup' });
+                            eclipseLayer.addLayer(path);
+
+                            // Start/end markers
+                            var startIcon = L.divIcon({
+                                className: 'eclipse-start',
+                                html: '<div style="font-size:16px;text-shadow:0 0 8px ' + e.color + '80">🌑</div>',
+                                iconSize: [18, 18], iconAnchor: [9, 9]
+                            });
+                            L.marker(e.coords[0], { icon: startIcon })
+                              .bindPopup(popupHtml, { maxWidth: 400, className: 'dark-popup' })
+                              .addTo(eclipseLayer);
+                        });
+                    }
+
+                    // ═══════════════════════════════════════
                     //  HEATMAP (simple density circles)
                     // ═══════════════════════════════════════
 
@@ -998,6 +1183,150 @@ namespace N01D.Overwatch
             </body>
             </html>
             """;
+        }
+
+        // ═══════════════════════════════════════════
+        //  ECLIPSE MONITORING
+        // ═══════════════════════════════════════════
+
+        private void LoadEclipseData()
+        {
+            var eclipses = _eclipse.GetAllEclipses();
+            var vms = eclipses.Select(e => new EclipseViewModel(e)).ToList();
+            lstEclipses.ItemsSource = vms;
+            UpdateEclipseCountdown();
+        }
+
+        private void StartEclipseCountdown()
+        {
+            _eclipseTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+            _eclipseTimer.Tick += (_, _) => UpdateEclipseCountdown();
+            _eclipseTimer.Start();
+        }
+
+        private void UpdateEclipseCountdown()
+        {
+            var (next, countdown) = _eclipse.GetNextEclipseCountdown();
+            if (next != null)
+            {
+                var icon = next.Type switch
+                {
+                    EclipseType.SolarTotal => "🌑",
+                    EclipseType.SolarAnnular => "🌗",
+                    EclipseType.SolarPartial => "🌘",
+                    EclipseType.LunarTotal => "🌕",
+                    EclipseType.LunarPartial => "🌔",
+                    _ => "🌙"
+                };
+                txtNextEclipse.Text = $"{icon} {next.Name} — {next.Date:yyyy-MM-dd HH:mm UTC} — Coverage: {next.MECoveragePercent}% ME";
+                txtEclipseCountdown.Text = $"T-{countdown.Days}d {countdown.Hours:D2}h {countdown.Minutes:D2}m {countdown.Seconds:D2}s";
+                txtEclipseMilSig.Text = next.MilitarySignificance;
+            }
+            else
+            {
+                txtNextEclipse.Text = "No upcoming ME-visible eclipses in database";
+                txtEclipseCountdown.Text = "";
+                txtEclipseMilSig.Text = "";
+            }
+
+            // Check for active eclipse — flash alert
+            var active = _eclipse.GetActiveEclipse();
+            if (active != null)
+            {
+                txtEclipseCountdown.Text = "⚡ ECLIPSE IN PROGRESS";
+                txtEclipseCountdown.Foreground = new SolidColorBrush(Color.FromRgb(0xEE, 0x33, 0x33));
+            }
+            else
+            {
+                txtEclipseCountdown.Foreground = new SolidColorBrush(Color.FromRgb(0xFF, 0x88, 0x33));
+            }
+        }
+
+        private void BtnRefreshEclipses_Click(object sender, RoutedEventArgs e) => LoadEclipseData();
+
+        private void LstEclipses_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (lstEclipses.SelectedItem is EclipseViewModel vm && vm.Eclipse.PathCoordinates.Count > 0)
+            {
+                // Fly to eclipse path center on map
+                var mid = vm.Eclipse.PathCoordinates[vm.Eclipse.PathCoordinates.Count / 2];
+                try
+                {
+                    webMap.CoreWebView2?.ExecuteScriptAsync($"flyTo({mid.Lat},{mid.Lon},4)");
+                    tabMain.SelectedIndex = 1; // Switch to map tab
+                }
+                catch { }
+            }
+        }
+
+        // ═══════════════════════════════════════════
+        //  MISSILE / DEFENSE DATA
+        // ═══════════════════════════════════════════
+
+        private void LoadMissileDefenseData()
+        {
+            dgMissiles.ItemsSource = _missiles.GetAllMissileSites();
+            dgDefense.ItemsSource = _missiles.GetAllAirDefenseSites();
+        }
+
+        private void BtnShowMissilesOnMap_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                UpdateMapMissiles();
+                UpdateMapDefense();
+                tabMain.SelectedIndex = 1; // Switch to Map tab
+                webMap.CoreWebView2?.ExecuteScriptAsync("flyTo(30, 50, 5)");
+                txtStatus.Text = "🚀 Missile sites & air defense systems displayed on map";
+            }
+            catch { }
+        }
+
+        private void UpdateMapMissiles()
+        {
+            try
+            {
+                var data = _missiles.BuildMissileMapData();
+                webMap.CoreWebView2?.ExecuteScriptAsync($"updateMissiles([{data}])");
+            }
+            catch { }
+        }
+
+        private void UpdateMapDefense()
+        {
+            try
+            {
+                var data = _missiles.BuildDefenseMapData();
+                webMap.CoreWebView2?.ExecuteScriptAsync($"updateDefense([{data}])");
+            }
+            catch { }
+        }
+
+        private void UpdateMapEclipses()
+        {
+            try
+            {
+                var eclipses = _eclipse.GetMEVisibleEclipses();
+                var data = string.Join(",", eclipses.Where(e => e.PathCoordinates.Count > 0).Select(e =>
+                {
+                    var coords = string.Join(",", e.PathCoordinates.Select(p => $"[{p.Lat},{p.Lon}]"));
+                    var name = Escape(e.Name);
+                    var desc = Escape(e.Description);
+                    var milSig = Escape(e.MilitarySignificance);
+                    var date = e.Date.ToString("yyyy-MM-dd HH:mm UTC");
+                    var color = e.Type switch
+                    {
+                        EclipseType.SolarTotal => "#DDCC33",
+                        EclipseType.SolarAnnular => "#FF8833",
+                        EclipseType.SolarPartial => "#AA55FF",
+                        _ => "#6A6A80"
+                    };
+                    return $"{{coords:[{coords}],name:'{name}',desc:'{desc}',milSig:'{milSig}'," +
+                           $"date:'{date}',color:'{color}',mag:{e.MaxMagnitude},coverage:{e.MECoveragePercent}}}";
+                }));
+                webMap.CoreWebView2?.ExecuteScriptAsync($"updateEclipses([{data}])");
+            }
+            catch { }
         }
 
         // ═══════════════════════════════════════════
@@ -1109,5 +1438,58 @@ namespace N01D.Overwatch
         public string Description =>
             $"Min severity: {_rule.MinSeverity} | Keywords: {string.Join(", ", _rule.Keywords.Take(5))}" +
             (_rule.Keywords.Count > 5 ? $" +{_rule.Keywords.Count - 5} more" : "");
+    }
+
+    public class EclipseViewModel
+    {
+        public EclipseEvent Eclipse { get; }
+
+        public EclipseViewModel(EclipseEvent e) => Eclipse = e;
+
+        public string Name => Eclipse.Name;
+        public string Description => Eclipse.Description;
+        public string DateDisplay => Eclipse.Date.ToString("yyyy-MM-dd HH:mm UTC");
+
+        public string Icon => Eclipse.Type switch
+        {
+            EclipseType.SolarTotal => "🌑",
+            EclipseType.SolarAnnular => "🌗",
+            EclipseType.SolarPartial => "🌘",
+            EclipseType.LunarTotal => "🌕",
+            EclipseType.LunarPartial => "🌔",
+            _ => "🌙"
+        };
+
+        public string StatusColor
+        {
+            get
+            {
+                if (Eclipse.Date < DateTime.UtcNow) return "#6A6A80";
+                if (Eclipse.MECoveragePercent >= 70) return "#EE3333";
+                if (Eclipse.MECoveragePercent >= 40) return "#FF8833";
+                if (Eclipse.IsVisibleFromME) return "#3388FF";
+                return "#6A6A80";
+            }
+        }
+
+        public string MELabel => Eclipse.IsVisibleFromME
+            ? $"ME: {Eclipse.MECoveragePercent}%"
+            : "NOT VISIBLE";
+
+        public string MELabelColor => Eclipse.IsVisibleFromME ? "#33CC33" : "#6A6A80";
+
+        public string CountdownDisplay
+        {
+            get
+            {
+                if (Eclipse.Date < DateTime.UtcNow) return "PAST";
+                var diff = Eclipse.Date - DateTime.UtcNow;
+                if (diff.TotalDays > 365) return $"T-{diff.Days / 365}y {diff.Days % 365}d";
+                if (diff.TotalDays > 30) return $"T-{diff.Days}d";
+                return $"T-{diff.Days}d {diff.Hours}h";
+            }
+        }
+
+        public string MagnitudeDisplay => $"Mag: {Eclipse.MaxMagnitude:F3}";
     }
 }

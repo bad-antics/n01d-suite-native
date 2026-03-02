@@ -135,6 +135,77 @@ namespace N01D.Overwatch.Services
             "EGY",                // Egyptian AF
             "PAF",                // Pakistan AF
             "INDIAN",             // Indian AF
+
+            // ── Additional US Callsigns ──
+            "DECOY",              // Decoy/countermeasures
+            "FLASH",              // Fast-movers
+            "GHOST",              // Stealth ops
+            "LANCE",              // Heavy attack
+            "ORCA",               // Submarine hunters
+            "RAVEN",              // ISR/EW
+            "SHADOW",             // SOF helo
+            "SPECTRE",            // AC-130
+            "STALKER",            // Persistent ISR
+            "STORM",              // CAS operations
+            "TALON",              // SOF
+            "VENOM",              // AH-1Z
+            "WIDOW",              // AH-64 Apache
+            "BANDIT",             // Fighter intercept
+            "HUNTER",             // Hunter-killer ops
+            "SABER",              // Cavalry scout
+            "SPARTAN",            // C-27J
+            "DRAGONFLY",          // A-10 CAS
+            "HOG",                // A-10 Warthog
+            "WARDOG",             // Mixed fighter
+            "WOLFPACK",           // F-16 package
+            "PHOENIX",            // F-15 ops
+            "EAGLE",              // F-15 Eagle
+            "MUSTANG",            // Heritage/F-16
+            "ROGUE",              // Aggressor squadron
+            "AGGRESSOR",          // Red air
+            "TOPGUN",             // Navy aggressor
+
+            // ── Russian Military ──
+            "RFF", "RSD",         // Russian AF
+            "CCCP",               // Legacy Soviet
+            "SU", "MIG", "TU",   // Aircraft type prefixes
+            "ANTONOV",            // Heavy transport
+
+            // ── Chinese Military ──
+            "CFC", "PLAAF",       // PLA Air Force
+            "PLAN",               // PLA Navy
+
+            // ── Drone / UAS Callsigns ──  
+            "PRED",               // MQ-1 Predator
+            "SCAN",               // Scan Eagle
+            "GRAY",               // Gray Eagle MQ-1C
+            "FIDO",               // Fire Scout
+            "TRITON",             // MQ-4C Triton
+            "SENTINEL",           // RQ-170
+            "DARK",               // Classified UAS
+            "ORBITER",            // Israeli Orbiter
+            "HERMES",             // Israeli Hermes 900
+            "HERON",              // IAI Heron
+            "HAROP",              // IAI Harop loitering
+            "WING",               // Wing Loong (Chinese)
+            "CH",                 // CAIG CH-series drones
+            "MOHAJER",            // Iranian Mohajer
+            "SHAHED",             // Iranian Shahed
+            "ABABIL",             // Iranian Ababil
+            "KARRAR",             // Iranian Karrar UCAV
+            "KAMAN",              // Iranian Kaman-22
+            "AKINCI",             // Turkish Bayraktar Akıncı
+            "TB2",                // Turkish Bayraktar TB2
+
+            // ── Tanker / ISR Extended ──
+            "CASA",               // EADS CASA transport
+            "VOYAGER",            // RAF A330 MRTT
+            "ASTRA",              // ISR platform
+            "POSEIDON",           // P-8A alternate
+            "MERLIN",             // UK/NATO helo
+            "WILDCAT",            // AW159 Wildcat
+            "CHINOOK",            // CH-47
+            "OSPREY",             // V-22/MV-22
         };
 
         // Known military aircraft ICAO24 hex ranges
@@ -285,6 +356,48 @@ namespace N01D.Overwatch.Services
             if (cs.StartsWith("TRIDENT") || cs.StartsWith("NAVY") || cs.StartsWith("NAVY")) return "USN Aviation";
             if (cs.StartsWith("NATO")) return "NATO AWACS (E-3A)";
             if (cs.StartsWith("MMF")) return "A330 MRTT (NATO Tanker)";
+            // Drones / UAS
+            if (cs.StartsWith("PRED")) return "MQ-1 Predator (ISR)";
+            if (cs.StartsWith("GRAY")) return "MQ-1C Gray Eagle (ISR)";
+            if (cs.StartsWith("TRITON")) return "MQ-4C Triton (Maritime ISR)";
+            if (cs.StartsWith("SENTINEL")) return "RQ-170 Sentinel (Stealth ISR)";
+            if (cs.StartsWith("SCAN")) return "ScanEagle (Tactical ISR)";
+            if (cs.StartsWith("HERMES") || cs.StartsWith("HERON")) return "IAI Heron/Hermes (Israeli ISR)";
+            if (cs.StartsWith("HAROP")) return "IAI Harop (Loitering Munition)";
+            if (cs.StartsWith("ORBITER")) return "Aeronautics Orbiter (Israeli ISR)";
+            if (cs.StartsWith("MOHAJER")) return "Mohajer-6 (Iranian UCAV)";
+            if (cs.StartsWith("SHAHED")) return "Shahed-136/129 (Iranian Drone)";
+            if (cs.StartsWith("ABABIL")) return "Ababil-3 (Iranian Drone)";
+            if (cs.StartsWith("KARRAR")) return "Karrar (Iranian UCAV)";
+            if (cs.StartsWith("KAMAN")) return "Kaman-22 (Iranian Drone)";
+            if (cs.StartsWith("AKINCI")) return "Bayraktar Akıncı (Turkish UCAV)";
+            if (cs.StartsWith("TB2")) return "Bayraktar TB2 (Turkish UCAV)";
+            if (cs.StartsWith("WING")) return "Wing Loong II (Chinese UCAV)";
+            // CAS / Attack
+            if (cs.StartsWith("HOG") || cs.StartsWith("DRAGONFLY")) return "A-10 Thunderbolt II (CAS)";
+            if (cs.StartsWith("WIDOW")) return "AH-64 Apache (Attack Helo)";
+            if (cs.StartsWith("VENOM")) return "AH-1Z Viper (Attack Helo)";
+            if (cs.StartsWith("SPECTRE")) return "AC-130 Spectre (Gunship)";
+            // Fighters extended
+            if (cs.StartsWith("EAGLE") || cs.StartsWith("PHOENIX")) return "F-15 Eagle";
+            if (cs.StartsWith("WOLFPACK") || cs.StartsWith("MUSTANG")) return "F-16 Fighting Falcon";
+            if (cs.StartsWith("GHOST") || cs.StartsWith("BAT")) return "Stealth Aircraft";
+            if (cs.StartsWith("BANDIT") || cs.StartsWith("WARDOG")) return "Fighter (Intercept)";
+            if (cs.StartsWith("ROGUE") || cs.StartsWith("AGGRESSOR") || cs.StartsWith("TOPGUN")) return "Aggressor Squadron";
+            // SOF / Special
+            if (cs.StartsWith("SHADOW") || cs.StartsWith("TALON")) return "SOF Rotary Wing";
+            if (cs.StartsWith("STALKER") || cs.StartsWith("RAVEN")) return "ISR Platform";
+            if (cs.StartsWith("HUNTER") || cs.StartsWith("SABER")) return "Hunter-Killer UAS/Helo";
+            // Transport extended
+            if (cs.StartsWith("SPARTAN")) return "C-27J Spartan";
+            if (cs.StartsWith("CHINOOK")) return "CH-47 Chinook";
+            if (cs.StartsWith("OSPREY")) return "V-22/MV-22 Osprey";
+            if (cs.StartsWith("VOYAGER")) return "A330 MRTT Voyager";
+            // Russian
+            if (cs.StartsWith("ANTONOV")) return "An-124 Ruslan (Heavy Transport)";
+            if (cs.StartsWith("SU")) return "Sukhoi Fighter";
+            if (cs.StartsWith("MIG")) return "MiG Fighter";
+            if (cs.StartsWith("TU")) return "Tupolev (Bomber/ISR)";
             return "Military Aircraft";
         }
 
@@ -297,16 +410,22 @@ namespace N01D.Overwatch.Services
             // Critical — strategic / nuclear C2 / stealth
             if (cs.StartsWith("HOMER") || cs.StartsWith("SKY") ||
                 cs.StartsWith("RAIDR") || cs.StartsWith("DEATH") ||
-                cs.StartsWith("ORDER"))
+                cs.StartsWith("ORDER") || cs.StartsWith("GHOST") ||
+                cs.StartsWith("HAROP") || cs.StartsWith("SHAHED"))
                 return SeverityLevel.Critical;
-            // High — bombers, gunships, ISR drones, SEAD
+            // High — bombers, gunships, ISR drones, SEAD, loitering munitions
             if (cs.StartsWith("BONE") || cs.StartsWith("FORTE") || cs.StartsWith("DRAGN") ||
                 cs.StartsWith("CYLON") || cs.StartsWith("NIGHT") || cs.StartsWith("SPOOK") ||
                 cs.StartsWith("WEASEL") || cs.StartsWith("DOOM") || cs.StartsWith("GRIM") ||
                 cs.StartsWith("REAPER") || cs.StartsWith("JSTAR") || cs.StartsWith("NEON") ||
                 cs.StartsWith("VADER") || cs.StartsWith("RAPTOR") ||
+                cs.StartsWith("SPECTRE") || cs.StartsWith("STALKER") ||
+                cs.StartsWith("WIDOW") || cs.StartsWith("HOG") || cs.StartsWith("DRAGONFLY") ||
+                cs.StartsWith("AKINCI") || cs.StartsWith("MOHAJER") || cs.StartsWith("KARRAR") ||
+                cs.StartsWith("TRITON") || cs.StartsWith("SENTINEL") ||
                 aircraftType.Contains("Stealth") || aircraftType.Contains("Bomber") ||
-                aircraftType.Contains("Gunship") || aircraftType.Contains("SEAD"))
+                aircraftType.Contains("Gunship") || aircraftType.Contains("SEAD") ||
+                aircraftType.Contains("Loitering") || aircraftType.Contains("UCAV"))
                 return SeverityLevel.High;
             // Medium — fighters, patrol, tankers, AWACS
             if (cs.StartsWith("SNTRY") || cs.StartsWith("AWACS") || cs.StartsWith("MAGIC") ||

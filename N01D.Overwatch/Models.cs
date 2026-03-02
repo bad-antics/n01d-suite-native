@@ -110,4 +110,87 @@ namespace N01D.Overwatch.Models
         public EventCategory DefaultCategory { get; set; }
         public bool Enabled { get; set; } = true;
     }
+
+    // ══════════════════════════════════════════
+    //  ECLIPSE MODELS
+    // ══════════════════════════════════════════
+
+    public enum EclipseType
+    {
+        SolarTotal,
+        SolarAnnular,
+        SolarPartial,
+        LunarTotal,
+        LunarPartial,
+        LunarPenumbral
+    }
+
+    public class EclipseEvent
+    {
+        public string Id { get; set; } = "";
+        public string Name { get; set; } = "";
+        public EclipseType Type { get; set; }
+        public DateTime Date { get; set; }
+        public DateTime PeakTime { get; set; }
+        public int DurationMinutes { get; set; }
+        public double MaxMagnitude { get; set; }
+        public string Description { get; set; } = "";
+        public string MilitarySignificance { get; set; } = "";
+        public string VisibilityRegion { get; set; } = "";
+        public bool IsVisibleFromME { get; set; }
+        public int MECoveragePercent { get; set; }
+        public List<(double Lat, double Lon)> PathCoordinates { get; set; } = new();
+    }
+
+    // ══════════════════════════════════════════
+    //  MISSILE & DEFENSE MODELS
+    // ══════════════════════════════════════════
+
+    public enum MissileSiteType
+    {
+        BallisticMissile,
+        CruiseMissile,
+        AntiShip,
+        TestRange,
+        StorageDepot
+    }
+
+    public enum AirDefenseType
+    {
+        ShortRange,     // <40km (Iron Dome, Tor, Pantsir)
+        MediumRange,    // 40-200km (Patriot, David's Sling, Buk, Khordad)
+        LongRange,      // 200-400km (S-300, S-400, Bavar-373)
+        ABM             // Anti-ballistic missile (Arrow, THAAD)
+    }
+
+    public class MissileSite
+    {
+        public string Id { get; set; } = "";
+        public string Name { get; set; } = "";
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+        public string Country { get; set; } = "";
+        public string Operator { get; set; } = "";
+        public MissileSiteType Type { get; set; }
+        public List<string> MissileTypes { get; set; } = new();
+        public int MaxRangeKm { get; set; }
+        public string Description { get; set; } = "";
+        public SeverityLevel ThreatLevel { get; set; }
+        public bool IsUnderground { get; set; }
+    }
+
+    public class AirDefenseSite
+    {
+        public string Id { get; set; } = "";
+        public string Name { get; set; } = "";
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+        public string Country { get; set; } = "";
+        public string Operator { get; set; } = "";
+        public string SystemType { get; set; } = "";
+        public int MaxRangeKm { get; set; }
+        public string Description { get; set; } = "";
+        public AirDefenseType DefenseType { get; set; }
+        public SeverityLevel ThreatLevel { get; set; }
+    }
 }

@@ -30,7 +30,7 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\pc123\\.nuget\\packages\\": {}
+    "W:\\caches\\nuget": {}
   },
   "project": {
     "version": "1.0.0",
@@ -38,7 +38,7 @@
       "projectUniqueName": "W:\\misc workspaces\\blackflag\\n01d-suite-native\\N01D.Term\\N01D.Term.csproj",
       "projectName": "N01D-Term",
       "projectPath": "W:\\misc workspaces\\blackflag\\n01d-suite-native\\N01D.Term\\N01D.Term.csproj",
-      "packagesPath": "C:\\Users\\pc123\\.nuget\\packages\\",
+      "packagesPath": "W:\\caches\\nuget",
       "outputPath": "W:\\misc workspaces\\blackflag\\n01d-suite-native\\N01D.Term\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
