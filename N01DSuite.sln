@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "N01D.Cron", "N01D.Cron\N01D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "N01D.Wipe", "N01D.Wipe\N01D.Wipe.csproj", "{5B4C618A-866B-4021-9F98-E01C512FC725}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "N01D.Overwatch", "N01D.Overwatch\N01D.Overwatch.csproj", "{96C84157-B19A-41C0-80F2-2EE477182D97}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -181,6 +183,18 @@ Global
 		{5B4C618A-866B-4021-9F98-E01C512FC725}.Release|x64.Build.0 = Release|Any CPU
 		{5B4C618A-866B-4021-9F98-E01C512FC725}.Release|x86.ActiveCfg = Release|Any CPU
 		{5B4C618A-866B-4021-9F98-E01C512FC725}.Release|x86.Build.0 = Release|Any CPU
+		{96C84157-B19A-41C0-80F2-2EE477182D97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{96C84157-B19A-41C0-80F2-2EE477182D97}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{96C84157-B19A-41C0-80F2-2EE477182D97}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{96C84157-B19A-41C0-80F2-2EE477182D97}.Debug|x64.Build.0 = Debug|Any CPU
+		{96C84157-B19A-41C0-80F2-2EE477182D97}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{96C84157-B19A-41C0-80F2-2EE477182D97}.Debug|x86.Build.0 = Debug|Any CPU
+		{96C84157-B19A-41C0-80F2-2EE477182D97}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{96C84157-B19A-41C0-80F2-2EE477182D97}.Release|Any CPU.Build.0 = Release|Any CPU
+		{96C84157-B19A-41C0-80F2-2EE477182D97}.Release|x64.ActiveCfg = Release|Any CPU
+		{96C84157-B19A-41C0-80F2-2EE477182D97}.Release|x64.Build.0 = Release|Any CPU
+		{96C84157-B19A-41C0-80F2-2EE477182D97}.Release|x86.ActiveCfg = Release|Any CPU
+		{96C84157-B19A-41C0-80F2-2EE477182D97}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
