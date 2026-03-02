@@ -1,0 +1,72 @@
+<Window x:Class="N01D.Cron.JobDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="N01D :: CRON — NEW JOB" Height="380" Width="550"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        Background="#0D0D0D">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="120"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Grid.Row="0" Grid.ColumnSpan="2" Text="⚙ NEW CRON JOB" FontFamily="Consolas" 
+                   FontSize="16" FontWeight="Bold" Foreground="#00FF41" Margin="0,0,0,16"/>
+
+        <TextBlock Grid.Row="1" Text="NAME:" FontFamily="Consolas" Foreground="#808080" 
+                   VerticalAlignment="Center" Margin="0,0,0,8"/>
+        <TextBox x:Name="txtName" Grid.Row="1" Grid.Column="1" Background="#1A1A1A" Foreground="#E0E0E0" 
+                 BorderBrush="#333333" FontFamily="Consolas" Padding="6,4" Margin="0,0,0,8"/>
+
+        <TextBlock Grid.Row="2" Text="COMMAND:" FontFamily="Consolas" Foreground="#808080" 
+                   VerticalAlignment="Center" Margin="0,0,0,8"/>
+        <TextBox x:Name="txtCommand" Grid.Row="2" Grid.Column="1" Background="#1A1A1A" Foreground="#E0E0E0" 
+                 BorderBrush="#333333" FontFamily="Consolas" Padding="6,4" Margin="0,0,0,8"/>
+
+        <TextBlock Grid.Row="3" Text="WORK DIR:" FontFamily="Consolas" Foreground="#808080" 
+                   VerticalAlignment="Center" Margin="0,0,0,8"/>
+        <TextBox x:Name="txtWorkDir" Grid.Row="3" Grid.Column="1" Background="#1A1A1A" Foreground="#E0E0E0" 
+                 BorderBrush="#333333" FontFamily="Consolas" Padding="6,4" Margin="0,0,0,8"/>
+
+        <TextBlock Grid.Row="4" Text="SCHEDULE:" FontFamily="Consolas" Foreground="#808080" 
+                   VerticalAlignment="Center" Margin="0,0,0,8"/>
+        <ComboBox x:Name="cmbSchedule" Grid.Row="4" Grid.Column="1" Margin="0,0,0,8"
+                  Background="#1A1A1A" Foreground="#E0E0E0" FontFamily="Consolas" SelectedIndex="1">
+            <ComboBoxItem Content="Once"/>
+            <ComboBoxItem Content="Interval (seconds)"/>
+            <ComboBoxItem Content="Hourly"/>
+            <ComboBoxItem Content="Daily"/>
+        </ComboBox>
+
+        <TextBlock Grid.Row="5" Text="INTERVAL:" FontFamily="Consolas" Foreground="#808080" 
+                   VerticalAlignment="Center" Margin="0,0,0,8"/>
+        <TextBox x:Name="txtInterval" Grid.Row="5" Grid.Column="1" Background="#1A1A1A" Foreground="#E0E0E0" 
+                 BorderBrush="#333333" FontFamily="Consolas" Padding="6,4" Margin="0,0,0,8" Text="300"/>
+
+        <TextBlock Grid.Row="6" Text="DAILY TIME:" FontFamily="Consolas" Foreground="#808080" 
+                   VerticalAlignment="Center" Margin="0,0,0,8"/>
+        <TextBox x:Name="txtDailyTime" Grid.Row="6" Grid.Column="1" Background="#1A1A1A" Foreground="#E0E0E0" 
+                 BorderBrush="#333333" FontFamily="Consolas" Padding="6,4" Margin="0,0,0,8" Text="00:00"/>
+
+        <StackPanel Grid.Row="8" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" 
+                    Margin="0,12,0,0">
+            <Button Content="CANCEL" Click="BtnCancel_Click" Padding="16,6" Margin="0,0,8,0"
+                    Background="#1A1A1A" Foreground="#808080" BorderBrush="#333333" 
+                    FontFamily="Consolas" Cursor="Hand"/>
+            <Button Content="CREATE" Click="BtnCreate_Click" Padding="16,6"
+                    Background="#1A1A1A" Foreground="#00FF41" BorderBrush="#00FF41" 
+                    FontFamily="Consolas" Cursor="Hand"/>
+        </StackPanel>
+    </Grid>
+</Window>
