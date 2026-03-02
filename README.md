@@ -10,15 +10,27 @@
                     [ NATIVE WINDOWS DESKTOP TOOLS | bad-antics ]
 ```
 
-Native Windows WPF implementations of the N01D tool suite with hacker aesthetics.
+Native Windows WPF desktop tools with hacker aesthetics. 13 apps, one solution.
 
-## 🛠️ Tools Included
+> **🛰️ Flagship app: [N01D Overwatch](https://github.com/bad-antics/n01d-overwatch)** — Real-time conflict intelligence dashboard with 82+ OSINT feeds, flight tracking, war ops monitoring, missile defense mapping, and interactive tactical map. [Get it standalone →](https://github.com/bad-antics/n01d-overwatch)
+
+## 🛠️ Tools Included (13 Apps)
 
 | Tool | Description |
 |------|-------------|
+| **🛰️ [N01D-Overwatch](https://github.com/bad-antics/n01d-overwatch)** | **Conflict intelligence dashboard** — 82+ OSINT feeds, flight tracking, war ops, missile defense, eclipse warfare, interactive Leaflet.js map |
 | **N01D-SysMon** | Real-time system monitor with CPU, memory, disk, network stats |
 | **N01D-Notes** | Markdown note-taking with live preview |
 | **N01D-Term** | Modern terminal emulator with tabs |
+| **N01D-Forge** | Code snippet forge & template generator |
+| **N01D-Media** | Media player & file manager |
+| **N01D-Vault** | Encrypted password & secrets manager (AES-256) |
+| **N01D-Pulse** | Network pulse monitor & port scanner |
+| **N01D-Calc** | Hacker calculator (hex/bin/dec/oct + bitwise ops) |
+| **N01D-Clip** | Clipboard history manager with search |
+| **N01D-Cron** | Task scheduler & cron job manager |
+| **N01D-Wipe** | Secure file & folder wiping (DoD 5220.22-M) |
+| **N01D-Shared** | Shared theme library (N01D cyberpunk + XChat IRC palette) |
 
 ## ⚡ Features
 
@@ -113,12 +125,18 @@ All apps use the N01D cyberpunk theme:
 
 | Tool | Platform | Status |
 |------|----------|--------|
+| [N01D-Overwatch](https://github.com/bad-antics/n01d-overwatch) | Windows Native | ✅ **Flagship** — [Standalone Repo](https://github.com/bad-antics/n01d-overwatch) |
 | N01D-SysMon | Windows Native | ✅ Complete |
 | N01D-Notes | Windows Native | ✅ Complete |
 | N01D-Term | Windows Native | ✅ Complete |
-| [n01d-sysmon](https://github.com/bad-antics/n01d-sysmon) | Python/Cross-platform | Original |
-| [n01d-notes](https://github.com/bad-antics/n01d-notes) | Python/Cross-platform | Original |
-| [n01d-term](https://github.com/bad-antics/n01d-term) | Python/Cross-platform | Original |
+| N01D-Forge | Windows Native | ✅ Complete |
+| N01D-Media | Windows Native | ✅ Complete |
+| N01D-Vault | Windows Native | ✅ Complete |
+| N01D-Pulse | Windows Native | ✅ Complete |
+| N01D-Calc | Windows Native | ✅ Complete |
+| N01D-Clip | Windows Native | ✅ Complete |
+| N01D-Cron | Windows Native | ✅ Complete |
+| N01D-Wipe | Windows Native | ✅ Complete |
 
 ## 📜 License
 
