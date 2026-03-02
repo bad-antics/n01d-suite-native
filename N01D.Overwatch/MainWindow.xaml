@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
         Title="N01D :: OVERWATCH" Width="1400" Height="900"
-        Style="{StaticResource N01DWindow}" WindowStartupLocation="CenterScreen">
+        Style="{StaticResource XChatWindow}" WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -13,7 +13,7 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <Border Grid.Row="0" Background="#0D0D0D" BorderBrush="#00FF41" BorderThickness="0,0,0,1" Padding="16,10">
+        <Border Grid.Row="0" Background="{StaticResource XChatBackgroundBrush}" BorderBrush="{StaticResource XChatBlueBrush}" BorderThickness="0,0,0,2" Padding="16,10">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -22,35 +22,35 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Grid.Column="0" FontFamily="Consolas" FontSize="18" FontWeight="Bold">
-                    <Run Text="[ " Foreground="#808080"/>
-                    <Run Text="N01D" Foreground="#00FF41"/>
-                    <Run Text=" :: " Foreground="#808080"/>
-                    <Run Text="OVERWATCH" Foreground="#0ABDC6"/>
-                    <Run Text=" ]" Foreground="#808080"/>
+                    <Run Text="[ " Foreground="{StaticResource XChatTextDimBrush}"/>
+                    <Run Text="N01D" Foreground="{StaticResource XChatBlueBrush}"/>
+                    <Run Text=" :: " Foreground="{StaticResource XChatTextDimBrush}"/>
+                    <Run Text="OVERWATCH" Foreground="{StaticResource XChatPurpleBrush}"/>
+                    <Run Text=" ]" Foreground="{StaticResource XChatTextDimBrush}"/>
                 </TextBlock>
 
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
                     <TextBlock x:Name="txtThreatLevel" FontFamily="Consolas" FontSize="14" 
-                               Foreground="#FFAA00" VerticalAlignment="Center" Margin="20,0"
+                               Foreground="{StaticResource XChatOrangeBrush}" VerticalAlignment="Center" Margin="20,0"
                                Text="THREAT LEVEL: ELEVATED"/>
                     <TextBlock x:Name="txtAlertCount" FontFamily="Consolas" FontSize="13"
-                               Foreground="#FF0055" VerticalAlignment="Center"
+                               Foreground="{StaticResource XChatRedBrush}" VerticalAlignment="Center"
                                Text="⚠ 0 ALERTS"/>
                 </StackPanel>
 
                 <StackPanel Grid.Column="2" Orientation="Horizontal">
-                    <Button x:Name="btnRefresh" Content="⟳ REFRESH" Style="{StaticResource N01DButton}"
+                    <Button x:Name="btnRefresh" Content="⟳ REFRESH" Style="{StaticResource XChatButton}"
                             Click="BtnRefresh_Click" FontSize="11" Margin="4,0"/>
-                    <Button x:Name="btnExportJson" Content="📥 JSON" Style="{StaticResource N01DButton}"
+                    <Button x:Name="btnExportJson" Content="📥 JSON" Style="{StaticResource XChatButton}"
                             Click="BtnExportJson_Click" FontSize="11" Margin="4,0"/>
-                    <Button x:Name="btnExportCsv" Content="📥 CSV" Style="{StaticResource N01DButton}"
+                    <Button x:Name="btnExportCsv" Content="📥 CSV" Style="{StaticResource XChatButton}"
                             Click="BtnExportCsv_Click" FontSize="11" Margin="4,0"/>
                 </StackPanel>
             </Grid>
         </Border>
 
         <!-- Filter Bar -->
-        <Border Grid.Row="1" Background="#1A1A1A" Padding="12,6" BorderBrush="#333333" BorderThickness="0,0,0,1">
+        <Border Grid.Row="1" Background="{StaticResource XChatSurfaceBrush}" Padding="12,6" BorderBrush="{StaticResource XChatBorderBrush}" BorderThickness="0,0,0,1">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -68,40 +68,40 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Grid.Column="0" Text="🔍" FontSize="14" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                <TextBox x:Name="txtSearch" Grid.Column="1" Style="{StaticResource N01DTextBox}"
+                <TextBox x:Name="txtSearch" Grid.Column="1" Style="{StaticResource XChatTextBox}"
                          FontSize="12" TextChanged="TxtSearch_TextChanged" 
                          Tag="Search events..."/>
 
                 <TextBlock Grid.Column="2" Text="  FILTER:" FontFamily="Consolas" FontSize="11"
-                           Foreground="#808080" VerticalAlignment="Center" Margin="10,0,6,0"/>
+                           Foreground="{StaticResource XChatTextDimBrush}" VerticalAlignment="Center" Margin="10,0,6,0"/>
 
-                <CheckBox x:Name="chkMilitary" Grid.Column="3" Content="⚔ Military" Foreground="#E0E0E0"
+                <CheckBox x:Name="chkMilitary" Grid.Column="3" Content="⚔ Military" Foreground="{StaticResource XChatTextBrush}"
                           FontFamily="Consolas" FontSize="11" IsChecked="True" VerticalAlignment="Center"
                           Margin="4,0" Checked="Filter_Changed" Unchecked="Filter_Changed"/>
-                <CheckBox x:Name="chkDiplomatic" Grid.Column="4" Content="🏛 Diplomatic" Foreground="#E0E0E0"
+                <CheckBox x:Name="chkDiplomatic" Grid.Column="4" Content="🏛 Diplomatic" Foreground="{StaticResource XChatTextBrush}"
                           FontFamily="Consolas" FontSize="11" IsChecked="True" VerticalAlignment="Center"
                           Margin="4,0" Checked="Filter_Changed" Unchecked="Filter_Changed"/>
-                <CheckBox x:Name="chkEconomic" Grid.Column="5" Content="💰 Economic" Foreground="#E0E0E0"
+                <CheckBox x:Name="chkEconomic" Grid.Column="5" Content="💰 Economic" Foreground="{StaticResource XChatTextBrush}"
                           FontFamily="Consolas" FontSize="11" IsChecked="True" VerticalAlignment="Center"
                           Margin="4,0" Checked="Filter_Changed" Unchecked="Filter_Changed"/>
-                <CheckBox x:Name="chkNuclear" Grid.Column="6" Content="☢ Nuclear" Foreground="#E0E0E0"
+                <CheckBox x:Name="chkNuclear" Grid.Column="6" Content="☢ Nuclear" Foreground="{StaticResource XChatTextBrush}"
                           FontFamily="Consolas" FontSize="11" IsChecked="True" VerticalAlignment="Center"
                           Margin="4,0" Checked="Filter_Changed" Unchecked="Filter_Changed"/>
-                <CheckBox x:Name="chkCyber" Grid.Column="7" Content="💻 Cyber" Foreground="#E0E0E0"
+                <CheckBox x:Name="chkCyber" Grid.Column="7" Content="💻 Cyber" Foreground="{StaticResource XChatTextBrush}"
                           FontFamily="Consolas" FontSize="11" IsChecked="True" VerticalAlignment="Center"
                           Margin="4,0" Checked="Filter_Changed" Unchecked="Filter_Changed"/>
-                <CheckBox x:Name="chkHumanitarian" Grid.Column="8" Content="🏥 Humanitarian" Foreground="#E0E0E0"
+                <CheckBox x:Name="chkHumanitarian" Grid.Column="8" Content="🏥 Humanitarian" Foreground="{StaticResource XChatTextBrush}"
                           FontFamily="Consolas" FontSize="11" IsChecked="True" VerticalAlignment="Center"
                           Margin="4,0" Checked="Filter_Changed" Unchecked="Filter_Changed"/>
-                <CheckBox x:Name="chkIntelligence" Grid.Column="9" Content="🕵 Intel" Foreground="#E0E0E0"
+                <CheckBox x:Name="chkIntelligence" Grid.Column="9" Content="🕵 Intel" Foreground="{StaticResource XChatTextBrush}"
                           FontFamily="Consolas" FontSize="11" IsChecked="True" VerticalAlignment="Center"
                           Margin="4,0" Checked="Filter_Changed" Unchecked="Filter_Changed"/>
 
                 <StackPanel Grid.Column="11" Orientation="Horizontal">
-                    <TextBlock Text="AUTO:" FontFamily="Consolas" FontSize="11" Foreground="#808080"
+                    <TextBlock Text="AUTO:" FontFamily="Consolas" FontSize="11" Foreground="{StaticResource XChatTextDimBrush}"
                                VerticalAlignment="Center" Margin="0,0,4,0"/>
                     <ComboBox x:Name="cmbInterval" Width="70" FontFamily="Consolas" FontSize="11"
-                              Background="#141414" Foreground="#E0E0E0" BorderBrush="#333333"
+                              Background="{StaticResource XChatInputBgBrush}" Foreground="{StaticResource XChatTextBrush}" BorderBrush="{StaticResource XChatBorderBrush}"
                               SelectionChanged="CmbInterval_Changed">
                         <ComboBoxItem Content="OFF" IsSelected="True"/>
                         <ComboBoxItem Content="1 min"/>
@@ -114,18 +114,18 @@
         </Border>
 
         <!-- Main Content — Tab Control -->
-        <TabControl x:Name="tabMain" Grid.Row="2" Style="{StaticResource N01DTabControl}" Margin="0">
+        <TabControl x:Name="tabMain" Grid.Row="2" Style="{StaticResource XChatTabControl}" Margin="0">
             
             <!-- TIMELINE TAB -->
-            <TabItem Header="📡 TIMELINE" Style="{StaticResource N01DTabItem}">
+            <TabItem Header="📡 TIMELINE" Style="{StaticResource XChatTabItem}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="340"/>
                     </Grid.ColumnDefinitions>
 
-                    <ListBox x:Name="lstTimeline" Grid.Column="0" Style="{StaticResource N01DListBox}"
-                             Background="#0D0D0D" BorderThickness="0"
+                    <ListBox x:Name="lstTimeline" Grid.Column="0" Style="{StaticResource XChatListBox}"
+                             Background="{StaticResource XChatBackgroundBrush}" BorderThickness="0"
                              SelectionChanged="LstTimeline_SelectionChanged"
                              ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                         <ListBox.ItemTemplate>
@@ -148,23 +148,23 @@
                                                        VerticalAlignment="Center" Margin="0,0,8,0"
                                                        DockPanel.Dock="Left"/>
                                             <TextBlock Text="{Binding TimeAgo}" FontFamily="Consolas"
-                                                       FontSize="10" Foreground="#808080"
+                                                       FontSize="10" Foreground="{StaticResource XChatTextDimBrush}"
                                                        VerticalAlignment="Center" HorizontalAlignment="Right"
                                                        DockPanel.Dock="Right"/>
                                             <TextBlock Text="{Binding Title}" FontFamily="Consolas"
-                                                       FontSize="12" Foreground="#E0E0E0" FontWeight="Bold"
+                                                       FontSize="12" Foreground="{StaticResource XChatTextBrush}" FontWeight="Bold"
                                                        TextTrimming="CharacterEllipsis"/>
                                         </DockPanel>
 
                                         <TextBlock Grid.Row="1" Text="{Binding Summary}" FontFamily="Consolas"
-                                                   FontSize="11" Foreground="#999999" TextWrapping="Wrap"
+                                                   FontSize="11" Foreground="{StaticResource XChatTextDimBrush}" TextWrapping="Wrap"
                                                    MaxHeight="40" Margin="20,3,0,0"/>
 
                                         <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="20,4,0,0">
                                             <TextBlock Text="{Binding Source}" FontFamily="Consolas"
-                                                       FontSize="10" Foreground="#0ABDC6" Margin="0,0,12,0"/>
+                                                       FontSize="10" Foreground="{StaticResource XChatCyanBrush}" Margin="0,0,12,0"/>
                                             <TextBlock Text="{Binding TagsDisplay}" FontFamily="Consolas"
-                                                       FontSize="10" Foreground="#808080"/>
+                                                       FontSize="10" Foreground="{StaticResource XChatTextDimBrush}"/>
                                         </StackPanel>
                                     </Grid>
                                 </Border>
@@ -173,28 +173,28 @@
                     </ListBox>
 
                     <!-- Detail Panel -->
-                    <Border Grid.Column="1" Background="#141414" BorderBrush="#333333" BorderThickness="1,0,0,0">
+                    <Border Grid.Column="1" Background="{StaticResource XChatSurfaceBrush}" BorderBrush="{StaticResource XChatBorderBrush}" BorderThickness="1,0,0,0">
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
                             <StackPanel x:Name="pnlDetail" Margin="12">
                                 <TextBlock Text="EVENT DETAIL" FontFamily="Consolas" FontSize="12"
-                                           Foreground="#0ABDC6" FontWeight="Bold" Margin="0,0,0,10"/>
+                                           Foreground="{StaticResource XChatPurpleBrush}" FontWeight="Bold" Margin="0,0,0,10"/>
                                 <TextBlock x:Name="txtDetailTitle" FontFamily="Consolas" FontSize="13"
-                                           Foreground="#00FF41" TextWrapping="Wrap" Margin="0,0,0,8"/>
+                                           Foreground="{StaticResource XChatBlueBrush}" TextWrapping="Wrap" Margin="0,0,0,8"/>
                                 <TextBlock x:Name="txtDetailSeverity" FontFamily="Consolas" FontSize="11"
                                            Margin="0,0,0,4"/>
                                 <TextBlock x:Name="txtDetailCategory" FontFamily="Consolas" FontSize="11"
-                                           Foreground="#E0E0E0" Margin="0,0,0,4"/>
+                                           Foreground="{StaticResource XChatTextBrush}" Margin="0,0,0,4"/>
                                 <TextBlock x:Name="txtDetailSource" FontFamily="Consolas" FontSize="11"
-                                           Foreground="#0ABDC6" Margin="0,0,0,4"/>
+                                           Foreground="{StaticResource XChatCyanBrush}" Margin="0,0,0,4"/>
                                 <TextBlock x:Name="txtDetailTime" FontFamily="Consolas" FontSize="11"
-                                           Foreground="#808080" Margin="0,0,0,4"/>
+                                           Foreground="{StaticResource XChatTextDimBrush}" Margin="0,0,0,4"/>
                                 <TextBlock x:Name="txtDetailLocation" FontFamily="Consolas" FontSize="11"
-                                           Foreground="#FFAA00" Margin="0,0,0,8"/>
+                                           Foreground="{StaticResource XChatOrangeBrush}" Margin="0,0,0,8"/>
                                 <TextBlock x:Name="txtDetailSummary" FontFamily="Consolas" FontSize="11"
-                                           Foreground="#E0E0E0" TextWrapping="Wrap" Margin="0,0,0,8"/>
+                                           Foreground="{StaticResource XChatTextBrush}" TextWrapping="Wrap" Margin="0,0,0,8"/>
                                 <TextBlock x:Name="txtDetailTags" FontFamily="Consolas" FontSize="10"
-                                           Foreground="#808080" TextWrapping="Wrap" Margin="0,0,0,10"/>
-                                <Button x:Name="btnOpenUrl" Content="🔗 OPEN SOURCE" Style="{StaticResource N01DButton}"
+                                           Foreground="{StaticResource XChatTextDimBrush}" TextWrapping="Wrap" Margin="0,0,0,10"/>
+                                <Button x:Name="btnOpenUrl" Content="🔗 OPEN SOURCE" Style="{StaticResource XChatButton}"
                                         Click="BtnOpenUrl_Click" FontSize="11" HorizontalAlignment="Left"
                                         Visibility="Collapsed"/>
                             </StackPanel>
@@ -204,43 +204,46 @@
             </TabItem>
 
             <!-- MAP TAB -->
-            <TabItem Header="🗺 MAP" Style="{StaticResource N01DTabItem}">
-                <wv2:WebView2 x:Name="webMap" DefaultBackgroundColor="#0D0D0D"/>
+            <TabItem Header="🗺 MAP" Style="{StaticResource XChatTabItem}">
+                <wv2:WebView2 x:Name="webMap" DefaultBackgroundColor="#080810"/>
             </TabItem>
 
             <!-- FLIGHTS TAB -->
-            <TabItem Header="✈ FLIGHTS" Style="{StaticResource N01DTabItem}">
+            <TabItem Header="✈ FLIGHTS" Style="{StaticResource XChatTabItem}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <Border Grid.Row="0" Background="#1A1A1A" Padding="10,6">
+                    <Border Grid.Row="0" Background="{StaticResource XChatSurfaceBrush}" Padding="10,6">
                         <DockPanel>
                             <TextBlock Text="MILITARY AIRCRAFT — MIDDLE EAST AIRSPACE" FontFamily="Consolas"
-                                       FontSize="12" Foreground="#0ABDC6" FontWeight="Bold" VerticalAlignment="Center"/>
+                                       FontSize="12" Foreground="{StaticResource XChatBlueBrush}" FontWeight="Bold" VerticalAlignment="Center"/>
                             <TextBlock x:Name="txtFlightCount" FontFamily="Consolas" FontSize="11"
-                                       Foreground="#808080" VerticalAlignment="Center" HorizontalAlignment="Right"
+                                       Foreground="{StaticResource XChatTextDimBrush}" VerticalAlignment="Center" HorizontalAlignment="Right"
                                        DockPanel.Dock="Right"/>
-                            <Button Content="⟳ SCAN" Style="{StaticResource N01DButton}"
+                            <Button Content="⟳ SCAN" Style="{StaticResource XChatButton}"
                                     Click="BtnScanFlights_Click" FontSize="11" HorizontalAlignment="Right"
                                     DockPanel.Dock="Right" Margin="0,0,10,0"/>
                         </DockPanel>
                     </Border>
                     <DataGrid x:Name="dgFlights" Grid.Row="1" AutoGenerateColumns="False"
-                              Background="#0D0D0D" Foreground="#E0E0E0" FontFamily="Consolas" FontSize="11"
+                              Background="{StaticResource XChatBackgroundBrush}" Foreground="{StaticResource XChatTextBrush}" 
+                              FontFamily="Consolas" FontSize="11"
                               BorderThickness="0" GridLinesVisibility="Horizontal"
-                              HorizontalGridLinesBrush="#1A1A1A" RowBackground="#0D0D0D"
-                              AlternatingRowBackground="#141414" IsReadOnly="True"
-                              HeadersVisibility="Column" CanUserSortColumns="True">
+                              HorizontalGridLinesBrush="{StaticResource XChatSurfaceBrush}" 
+                              RowBackground="{StaticResource XChatBackgroundBrush}"
+                              AlternatingRowBackground="{StaticResource XChatBackgroundAltBrush}" 
+                              IsReadOnly="True" HeadersVisibility="Column" CanUserSortColumns="True">
                         <DataGrid.ColumnHeaderStyle>
                             <Style TargetType="DataGridColumnHeader">
-                                <Setter Property="Background" Value="#1A1A1A"/>
-                                <Setter Property="Foreground" Value="#00FF41"/>
+                                <Setter Property="Background" Value="{StaticResource XChatSurfaceBrush}"/>
+                                <Setter Property="Foreground" Value="{StaticResource XChatBlueBrush}"/>
                                 <Setter Property="FontFamily" Value="Consolas"/>
                                 <Setter Property="FontSize" Value="11"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
                                 <Setter Property="Padding" Value="8,6"/>
-                                <Setter Property="BorderBrush" Value="#333333"/>
+                                <Setter Property="BorderBrush" Value="{StaticResource XChatBorderBrush}"/>
                                 <Setter Property="BorderThickness" Value="0,0,1,1"/>
                             </Style>
                         </DataGrid.ColumnHeaderStyle>
@@ -260,35 +263,38 @@
             </TabItem>
 
             <!-- MARITIME TAB -->
-            <TabItem Header="🚢 MARITIME" Style="{StaticResource N01DTabItem}">
+            <TabItem Header="🚢 MARITIME" Style="{StaticResource XChatTabItem}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <Border Grid.Row="0" Background="#1A1A1A" Padding="10,6">
+                    <Border Grid.Row="0" Background="{StaticResource XChatSurfaceBrush}" Padding="10,6">
                         <DockPanel>
                             <TextBlock Text="MARITIME DOMAIN AWARENESS — CRITICAL CHOKEPOINTS" FontFamily="Consolas"
-                                       FontSize="12" Foreground="#0ABDC6" FontWeight="Bold" VerticalAlignment="Center"/>
-                            <Button Content="⟳ SCAN" Style="{StaticResource N01DButton}"
+                                       FontSize="12" Foreground="{StaticResource XChatBlueBrush}" FontWeight="Bold" VerticalAlignment="Center"/>
+                            <Button Content="⟳ SCAN" Style="{StaticResource XChatButton}"
                                     Click="BtnScanShips_Click" FontSize="11" HorizontalAlignment="Right"
                                     DockPanel.Dock="Right"/>
                         </DockPanel>
                     </Border>
                     <DataGrid x:Name="dgVessels" Grid.Row="1" AutoGenerateColumns="False"
-                              Background="#0D0D0D" Foreground="#E0E0E0" FontFamily="Consolas" FontSize="11"
+                              Background="{StaticResource XChatBackgroundBrush}" Foreground="{StaticResource XChatTextBrush}" 
+                              FontFamily="Consolas" FontSize="11"
                               BorderThickness="0" GridLinesVisibility="Horizontal"
-                              HorizontalGridLinesBrush="#1A1A1A" RowBackground="#0D0D0D"
-                              AlternatingRowBackground="#141414" IsReadOnly="True"
-                              HeadersVisibility="Column">
+                              HorizontalGridLinesBrush="{StaticResource XChatSurfaceBrush}" 
+                              RowBackground="{StaticResource XChatBackgroundBrush}"
+                              AlternatingRowBackground="{StaticResource XChatBackgroundAltBrush}" 
+                              IsReadOnly="True" HeadersVisibility="Column">
                         <DataGrid.ColumnHeaderStyle>
                             <Style TargetType="DataGridColumnHeader">
-                                <Setter Property="Background" Value="#1A1A1A"/>
-                                <Setter Property="Foreground" Value="#00FF41"/>
+                                <Setter Property="Background" Value="{StaticResource XChatSurfaceBrush}"/>
+                                <Setter Property="Foreground" Value="{StaticResource XChatBlueBrush}"/>
                                 <Setter Property="FontFamily" Value="Consolas"/>
                                 <Setter Property="FontSize" Value="11"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
                                 <Setter Property="Padding" Value="8,6"/>
-                                <Setter Property="BorderBrush" Value="#333333"/>
+                                <Setter Property="BorderBrush" Value="{StaticResource XChatBorderBrush}"/>
                                 <Setter Property="BorderThickness" Value="0,0,1,1"/>
                             </Style>
                         </DataGrid.ColumnHeaderStyle>
@@ -306,55 +312,55 @@
             </TabItem>
 
             <!-- OIL TAB -->
-            <TabItem Header="🛢 OIL" Style="{StaticResource N01DTabItem}">
+            <TabItem Header="🛢 OIL" Style="{StaticResource XChatTabItem}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <Border Grid.Row="0" Background="#1A1A1A" Padding="10,6">
+                    <Border Grid.Row="0" Background="{StaticResource XChatSurfaceBrush}" Padding="10,6">
                         <DockPanel>
                             <TextBlock Text="CRUDE OIL MARKET INDICATORS" FontFamily="Consolas"
-                                       FontSize="12" Foreground="#0ABDC6" FontWeight="Bold" VerticalAlignment="Center"/>
-                            <Button Content="⟳ REFRESH" Style="{StaticResource N01DButton}"
+                                       FontSize="12" Foreground="{StaticResource XChatBlueBrush}" FontWeight="Bold" VerticalAlignment="Center"/>
+                            <Button Content="⟳ REFRESH" Style="{StaticResource XChatButton}"
                                     Click="BtnRefreshOil_Click" FontSize="11" HorizontalAlignment="Right"
                                     DockPanel.Dock="Right"/>
                         </DockPanel>
                     </Border>
                     <StackPanel x:Name="pnlOil" Margin="20" VerticalAlignment="Top">
                         <TextBlock Text="Loading oil prices..." FontFamily="Consolas" FontSize="13"
-                                   Foreground="#808080"/>
+                                   Foreground="{StaticResource XChatTextDimBrush}"/>
                     </StackPanel>
                 </Grid>
             </TabItem>
 
             <!-- ALERTS TAB -->
-            <TabItem Header="🔔 ALERTS" Style="{StaticResource N01DTabItem}">
+            <TabItem Header="🔔 ALERTS" Style="{StaticResource XChatTabItem}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <Border Grid.Row="0" Background="#1A1A1A" Padding="10,6">
+                    <Border Grid.Row="0" Background="{StaticResource XChatSurfaceBrush}" Padding="10,6">
                         <TextBlock Text="ACTIVE ALERT RULES" FontFamily="Consolas"
-                                   FontSize="12" Foreground="#0ABDC6" FontWeight="Bold"/>
+                                   FontSize="12" Foreground="{StaticResource XChatPurpleBrush}" FontWeight="Bold"/>
                     </Border>
-                    <ListBox x:Name="lstAlerts" Grid.Row="1" Style="{StaticResource N01DListBox}"
-                             Background="#0D0D0D">
+                    <ListBox x:Name="lstAlerts" Grid.Row="1" Style="{StaticResource XChatListBox}"
+                             Background="{StaticResource XChatBackgroundBrush}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Border Padding="10,6" Margin="2" CornerRadius="3"
-                                        Background="#141414" BorderBrush="#333333" BorderThickness="1">
+                                        Background="{StaticResource XChatSurfaceBrush}" BorderBrush="{StaticResource XChatBorderBrush}" BorderThickness="1">
                                     <StackPanel>
                                         <DockPanel>
                                             <TextBlock Text="{Binding Name}" FontFamily="Consolas" FontSize="12"
-                                                       Foreground="#00FF41" FontWeight="Bold"/>
+                                                       Foreground="{StaticResource XChatBlueBrush}" FontWeight="Bold"/>
                                             <TextBlock Text="{Binding StatusText}" FontFamily="Consolas" FontSize="10"
                                                        Foreground="{Binding StatusColor}" HorizontalAlignment="Right"
                                                        DockPanel.Dock="Right"/>
                                         </DockPanel>
                                         <TextBlock Text="{Binding Description}" FontFamily="Consolas" FontSize="10"
-                                                   Foreground="#808080" Margin="0,3,0,0"/>
+                                                   Foreground="{StaticResource XChatTextDimBrush}" Margin="0,3,0,0"/>
                                     </StackPanel>
                                 </Border>
                             </DataTemplate>
@@ -365,19 +371,19 @@
         </TabControl>
 
         <!-- Status Bar -->
-        <Border Grid.Row="3" Background="#0D0D0D" BorderBrush="#333333" BorderThickness="0,1,0,0" Padding="12,4">
+        <Border Grid.Row="3" Background="{StaticResource XChatBackgroundBrush}" BorderBrush="{StaticResource XChatBorderBrush}" BorderThickness="0,1,0,0" Padding="12,4">
             <DockPanel>
                 <TextBlock FontFamily="Consolas" FontSize="10" VerticalAlignment="Center">
-                    <Run Text="N01D.Overwatch" Foreground="#00FF41"/>
-                    <Run Text=" v1.0" Foreground="#808080"/>
-                    <Run Text=" │ " Foreground="#333333"/>
-                    <Run Text="bad-antics" Foreground="#808080"/>
+                    <Run Text="N01D.Overwatch" Foreground="{StaticResource XChatBlueBrush}"/>
+                    <Run Text=" v1.0" Foreground="{StaticResource XChatTextDimBrush}"/>
+                    <Run Text=" │ " Foreground="{StaticResource XChatBorderBrush}"/>
+                    <Run Text="bad-antics" Foreground="{StaticResource XChatTextDimBrush}"/>
                 </TextBlock>
                 <TextBlock x:Name="txtStatus" FontFamily="Consolas" FontSize="10"
-                           Foreground="#808080" HorizontalAlignment="Right" VerticalAlignment="Center"
+                           Foreground="{StaticResource XChatTextDimBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"
                            DockPanel.Dock="Right" Text="Ready"/>
                 <TextBlock x:Name="txtLastUpdate" FontFamily="Consolas" FontSize="10"
-                           Foreground="#808080" HorizontalAlignment="Right" VerticalAlignment="Center"
+                           Foreground="{StaticResource XChatTextDimBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"
                            DockPanel.Dock="Right" Margin="0,0,20,0"/>
             </DockPanel>
         </Border>

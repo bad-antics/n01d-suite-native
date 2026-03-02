@@ -1,0 +1,224 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!--  N01D.Overwatch — XChat Theme                                      -->
+    <!--  Inspired by XChat IRC client's classic dark interface              -->
+    <!--  Deep navy/charcoal backgrounds, IRC-style color coding             -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+
+    <!-- XChat Color Palette -->
+    <Color x:Key="XChatBackground">#080810</Color>          <!-- Deep navy-black -->
+    <Color x:Key="XChatBackgroundAlt">#10101C</Color>       <!-- Slightly lighter panel -->
+    <Color x:Key="XChatSurface">#161625</Color>             <!-- Cards/panels -->
+    <Color x:Key="XChatInputBg">#0C0C18</Color>            <!-- Input field background -->
+    <Color x:Key="XChatText">#D0D0D0</Color>               <!-- Primary text (IRC white) -->
+    <Color x:Key="XChatTextDim">#6A6A80</Color>            <!-- Timestamps, metadata -->
+    <Color x:Key="XChatBorder">#2A2A3E</Color>             <!-- Subtle purple-tinted border -->
+    <Color x:Key="XChatBorderActive">#3D3D5C</Color>       <!-- Active/hover border -->
+
+    <!-- XChat IRC Colors -->
+    <Color x:Key="XChatBlue">#3388FF</Color>               <!-- Links, actions, primary accent -->
+    <Color x:Key="XChatGreen">#33CC33</Color>              <!-- Join/part, success, nicks -->
+    <Color x:Key="XChatRed">#EE3333</Color>               <!-- Kicks, errors, critical -->
+    <Color x:Key="XChatPurple">#AA55FF</Color>             <!-- /me actions, secondary accent -->
+    <Color x:Key="XChatOrange">#FF8833</Color>             <!-- Highlights, warnings -->
+    <Color x:Key="XChatCyan">#33CCCC</Color>               <!-- Server messages, info -->
+    <Color x:Key="XChatYellow">#DDCC33</Color>             <!-- Channel names, notice -->
+    <Color x:Key="XChatPink">#FF55AA</Color>               <!-- Special alerts -->
+    <Color x:Key="XChatNavy">#2255AA</Color>               <!-- Tab indicators -->
+
+    <!-- Brushes -->
+    <SolidColorBrush x:Key="XChatBackgroundBrush" Color="{StaticResource XChatBackground}"/>
+    <SolidColorBrush x:Key="XChatBackgroundAltBrush" Color="{StaticResource XChatBackgroundAlt}"/>
+    <SolidColorBrush x:Key="XChatSurfaceBrush" Color="{StaticResource XChatSurface}"/>
+    <SolidColorBrush x:Key="XChatInputBgBrush" Color="{StaticResource XChatInputBg}"/>
+    <SolidColorBrush x:Key="XChatTextBrush" Color="{StaticResource XChatText}"/>
+    <SolidColorBrush x:Key="XChatTextDimBrush" Color="{StaticResource XChatTextDim}"/>
+    <SolidColorBrush x:Key="XChatBorderBrush" Color="{StaticResource XChatBorder}"/>
+    <SolidColorBrush x:Key="XChatBorderActiveBrush" Color="{StaticResource XChatBorderActive}"/>
+
+    <SolidColorBrush x:Key="XChatBlueBrush" Color="{StaticResource XChatBlue}"/>
+    <SolidColorBrush x:Key="XChatGreenBrush" Color="{StaticResource XChatGreen}"/>
+    <SolidColorBrush x:Key="XChatRedBrush" Color="{StaticResource XChatRed}"/>
+    <SolidColorBrush x:Key="XChatPurpleBrush" Color="{StaticResource XChatPurple}"/>
+    <SolidColorBrush x:Key="XChatOrangeBrush" Color="{StaticResource XChatOrange}"/>
+    <SolidColorBrush x:Key="XChatCyanBrush" Color="{StaticResource XChatCyan}"/>
+    <SolidColorBrush x:Key="XChatYellowBrush" Color="{StaticResource XChatYellow}"/>
+    <SolidColorBrush x:Key="XChatPinkBrush" Color="{StaticResource XChatPink}"/>
+    <SolidColorBrush x:Key="XChatNavyBrush" Color="{StaticResource XChatNavy}"/>
+
+    <!-- Fonts -->
+    <FontFamily x:Key="XChatMonoFont">Consolas, Lucida Console, Courier New</FontFamily>
+    <FontFamily x:Key="XChatUIFont">Segoe UI, Tahoma</FontFamily>
+
+    <!-- ─── Window Style ─── -->
+    <Style x:Key="XChatWindow" TargetType="Window">
+        <Setter Property="Background" Value="{StaticResource XChatBackgroundBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource XChatTextBrush}"/>
+        <Setter Property="FontFamily" Value="{StaticResource XChatMonoFont}"/>
+    </Style>
+
+    <!-- ─── Button Style (XChat toolbar look) ─── -->
+    <Style x:Key="XChatButton" TargetType="Button">
+        <Setter Property="Background" Value="{StaticResource XChatSurfaceBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource XChatCyanBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource XChatBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="12,5"/>
+        <Setter Property="FontFamily" Value="{StaticResource XChatMonoFont}"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="border" Background="{TemplateBinding Background}" 
+                            BorderBrush="{TemplateBinding BorderBrush}" 
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="2"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#1E1E35"/>
+                            <Setter Property="BorderBrush" Value="{StaticResource XChatBlueBrush}"/>
+                            <Setter Property="Foreground" Value="{StaticResource XChatBlueBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter Property="Background" Value="#252545"/>
+                            <Setter Property="BorderBrush" Value="{StaticResource XChatPurpleBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ─── TextBox Style (XChat input field) ─── -->
+    <Style x:Key="XChatTextBox" TargetType="TextBox">
+        <Setter Property="Background" Value="{StaticResource XChatInputBgBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource XChatTextBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource XChatBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="8,4"/>
+        <Setter Property="FontFamily" Value="{StaticResource XChatMonoFont}"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="CaretBrush" Value="{StaticResource XChatBlueBrush}"/>
+        <Setter Property="SelectionBrush" Value="{StaticResource XChatNavyBrush}"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="BorderBrush" Value="{StaticResource XChatBorderActiveBrush}"/>
+            </Trigger>
+            <Trigger Property="IsFocused" Value="True">
+                <Setter Property="BorderBrush" Value="{StaticResource XChatBlueBrush}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- ─── ListBox Style (XChat channel/message view) ─── -->
+    <Style x:Key="XChatListBox" TargetType="ListBox">
+        <Setter Property="Background" Value="{StaticResource XChatBackgroundBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource XChatTextBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource XChatBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="FontFamily" Value="{StaticResource XChatMonoFont}"/>
+    </Style>
+
+    <!-- ─── TabControl Style (XChat channel tabs) ─── -->
+    <Style x:Key="XChatTabControl" TargetType="TabControl">
+        <Setter Property="Background" Value="{StaticResource XChatBackgroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource XChatBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+
+    <!-- ─── TabItem Style (XChat channel tab with activity indicator) ─── -->
+    <Style x:Key="XChatTabItem" TargetType="TabItem">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{StaticResource XChatTextDimBrush}"/>
+        <Setter Property="FontFamily" Value="{StaticResource XChatMonoFont}"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="Padding" Value="14,7"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TabItem">
+                    <Border x:Name="Border" Background="{TemplateBinding Background}" 
+                            BorderThickness="0,0,0,2" BorderBrush="Transparent"
+                            Margin="0,0,1,0" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter ContentSource="Header"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Foreground" Value="{StaticResource XChatTextBrush}"/>
+                            <Setter TargetName="Border" Property="Background" Value="{StaticResource XChatBackgroundAltBrush}"/>
+                            <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource XChatBlueBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Foreground" Value="{StaticResource XChatCyanBrush}"/>
+                            <Setter TargetName="Border" Property="Background" Value="#0E0E1A"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ─── DataGrid Styles (XChat-style data grids) ─── -->
+    <Style x:Key="XChatDataGrid" TargetType="DataGrid">
+        <Setter Property="Background" Value="{StaticResource XChatBackgroundBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource XChatTextBrush}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+        <Setter Property="HorizontalGridLinesBrush" Value="{StaticResource XChatSurfaceBrush}"/>
+        <Setter Property="RowBackground" Value="{StaticResource XChatBackgroundBrush}"/>
+        <Setter Property="AlternatingRowBackground" Value="{StaticResource XChatBackgroundAltBrush}"/>
+        <Setter Property="FontFamily" Value="{StaticResource XChatMonoFont}"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="IsReadOnly" Value="True"/>
+        <Setter Property="HeadersVisibility" Value="Column"/>
+    </Style>
+
+    <Style x:Key="XChatColumnHeader" TargetType="DataGridColumnHeader">
+        <Setter Property="Background" Value="{StaticResource XChatSurfaceBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource XChatBlueBrush}"/>
+        <Setter Property="FontFamily" Value="Consolas"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Padding" Value="8,6"/>
+        <Setter Property="BorderBrush" Value="{StaticResource XChatBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="0,0,1,1"/>
+    </Style>
+
+    <!-- ─── CheckBox Style ─── -->
+    <Style x:Key="XChatCheckBox" TargetType="CheckBox">
+        <Setter Property="Foreground" Value="{StaticResource XChatTextBrush}"/>
+        <Setter Property="FontFamily" Value="{StaticResource XChatMonoFont}"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
+    <!-- ─── ComboBox Style ─── -->
+    <Style x:Key="XChatComboBox" TargetType="ComboBox">
+        <Setter Property="Background" Value="{StaticResource XChatInputBgBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource XChatTextBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource XChatBorderBrush}"/>
+        <Setter Property="FontFamily" Value="{StaticResource XChatMonoFont}"/>
+        <Setter Property="FontSize" Value="11"/>
+    </Style>
+
+    <!-- ─── ScrollBar Styles (dark, minimal like XChat) ─── -->
+    <Style TargetType="ScrollBar">
+        <Setter Property="Background" Value="{StaticResource XChatBackgroundBrush}"/>
+        <Setter Property="Width" Value="10"/>
+    </Style>
+
+    <!-- ─── ToolTip Style ─── -->
+    <Style TargetType="ToolTip">
+        <Setter Property="Background" Value="{StaticResource XChatSurfaceBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource XChatTextBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource XChatBorderBrush}"/>
+        <Setter Property="FontFamily" Value="{StaticResource XChatMonoFont}"/>
+        <Setter Property="FontSize" Value="11"/>
+    </Style>
+
+</ResourceDictionary>

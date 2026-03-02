@@ -204,12 +204,12 @@ namespace N01D.Overwatch
                 var isUp = p.Change >= 0;
                 var arrow = isUp ? "▲" : "▼";
                 var color = isUp
-                    ? (Math.Abs(p.ChangePercent) > 3 ? "#FF0055" : "#00FF41")
-                    : (Math.Abs(p.ChangePercent) > 3 ? "#FF0055" : "#FFAA00");
+                    ? (Math.Abs(p.ChangePercent) > 3 ? "#EE3333" : "#33CC33")
+                    : (Math.Abs(p.ChangePercent) > 3 ? "#EE3333" : "#FF8833");
 
                 var card = new Border
                 {
-                    Background = new SolidColorBrush(Color.FromRgb(0x14, 0x14, 0x14)),
+                    Background = new SolidColorBrush(Color.FromRgb(0x16, 0x16, 0x25)),
                     CornerRadius = new CornerRadius(5),
                     BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(color)!),
                     BorderThickness = new Thickness(1),
@@ -225,7 +225,7 @@ namespace N01D.Overwatch
                     Text = p.Name.ToUpperInvariant(),
                     FontFamily = new FontFamily("Consolas"),
                     FontSize = 14,
-                    Foreground = new SolidColorBrush(Color.FromRgb(0x0A, 0xBD, 0xC6)),
+                    Foreground = new SolidColorBrush(Color.FromRgb(0x33, 0x88, 0xFF)),
                     FontWeight = FontWeights.Bold
                 });
 
@@ -356,10 +356,10 @@ namespace N01D.Overwatch
 
             string level;
             string color;
-            if (criticals > 0) { level = "CRITICAL"; color = "#FF0055"; }
-            else if (highs > 5) { level = "HIGH"; color = "#FF0055"; }
-            else if (highs > 0) { level = "ELEVATED"; color = "#FFAA00"; }
-            else { level = "GUARDED"; color = "#00FF41"; }
+            if (criticals > 0) { level = "CRITICAL"; color = "#EE3333"; }
+            else if (highs > 5) { level = "HIGH"; color = "#EE3333"; }
+            else if (highs > 0) { level = "ELEVATED"; color = "#FF8833"; }
+            else { level = "GUARDED"; color = "#33CC33"; }
 
             txtThreatLevel.Text = $"THREAT LEVEL: {level}";
             txtThreatLevel.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(color)!);
@@ -404,10 +404,10 @@ namespace N01D.Overwatch
                 {
                     var color = e.Severity switch
                     {
-                        SeverityLevel.Critical => "#FF0055",
-                        SeverityLevel.High => "#FFAA00",
-                        SeverityLevel.Medium => "#0ABDC6",
-                        _ => "#808080"
+                        SeverityLevel.Critical => "#EE3333",
+                        SeverityLevel.High => "#FF8833",
+                        SeverityLevel.Medium => "#3388FF",
+                        _ => "#6A6A80"
                     };
                     var icon = e.DataSource switch
                     {
@@ -432,7 +432,7 @@ namespace N01D.Overwatch
             <head>
                 <meta charset="utf-8"/>
                 <style>
-                    body { margin: 0; background: #0D0D0D; }
+                    body { margin: 0; background: #080810; }
                     #map { width: 100vw; height: 100vh; }
                 </style>
                 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -456,7 +456,7 @@ namespace N01D.Overwatch
                                 radius: 6, color: d.color, fillColor: d.color,
                                 fillOpacity: 0.8, weight: 1
                             });
-                            circle.bindPopup('<div style="font-family:Consolas;font-size:12px;color:#E0E0E0;background:#1A1A1A;padding:6px;border:1px solid '+d.color+';border-radius:3px">' + d.title + '</div>', {
+                            circle.bindPopup('<div style="font-family:Consolas;font-size:12px;color:#D0D0D0;background:#161625;padding:6px;border:1px solid '+d.color+';border-radius:3px">' + d.title + '</div>', {
                                 className: 'dark-popup'
                             });
                             markerLayer.addLayer(circle);
@@ -464,16 +464,16 @@ namespace N01D.Overwatch
                     }
 
                     // Strategic zone overlays
-                    L.circle([26.56, 56.25], {radius: 50000, color: '#FF0055', fillOpacity: 0.05, weight: 1, dashArray: '5,5'})
-                     .bindPopup('<b style="color:#FF0055">Strait of Hormuz</b>').addTo(map);
-                    L.circle([12.58, 43.33], {radius: 50000, color: '#FFAA00', fillOpacity: 0.05, weight: 1, dashArray: '5,5'})
-                     .bindPopup('<b style="color:#FFAA00">Bab el-Mandeb</b>').addTo(map);
-                    L.circle([32.08, 51.68], {radius: 80000, color: '#0ABDC6', fillOpacity: 0.03, weight: 1, dashArray: '5,5'})
-                     .bindPopup('<b style="color:#0ABDC6">Isfahan — Nuclear</b>').addTo(map);
-                    L.circle([33.72, 51.73], {radius: 40000, color: '#0ABDC6', fillOpacity: 0.03, weight: 1, dashArray: '5,5'})
-                     .bindPopup('<b style="color:#0ABDC6">Natanz — Nuclear</b>').addTo(map);
-                    L.circle([34.38, 50.97], {radius: 30000, color: '#0ABDC6', fillOpacity: 0.03, weight: 1, dashArray: '5,5'})
-                     .bindPopup('<b style="color:#0ABDC6">Fordow — Nuclear</b>').addTo(map);
+                    L.circle([26.56, 56.25], {radius: 50000, color: '#EE3333', fillOpacity: 0.05, weight: 1, dashArray: '5,5'})
+                     .bindPopup('<b style="color:#EE3333">Strait of Hormuz</b>').addTo(map);
+                    L.circle([12.58, 43.33], {radius: 50000, color: '#FF8833', fillOpacity: 0.05, weight: 1, dashArray: '5,5'})
+                     .bindPopup('<b style="color:#FF8833">Bab el-Mandeb</b>').addTo(map);
+                    L.circle([32.08, 51.68], {radius: 80000, color: '#AA55FF', fillOpacity: 0.03, weight: 1, dashArray: '5,5'})
+                     .bindPopup('<b style="color:#AA55FF">Isfahan — Nuclear</b>').addTo(map);
+                    L.circle([33.72, 51.73], {radius: 40000, color: '#AA55FF', fillOpacity: 0.03, weight: 1, dashArray: '5,5'})
+                     .bindPopup('<b style="color:#AA55FF">Natanz — Nuclear</b>').addTo(map);
+                    L.circle([34.38, 50.97], {radius: 30000, color: '#AA55FF', fillOpacity: 0.03, weight: 1, dashArray: '5,5'})
+                     .bindPopup('<b style="color:#AA55FF">Fordow — Nuclear</b>').addTo(map);
                 </script>
             </body>
             </html>
@@ -543,10 +543,10 @@ namespace N01D.Overwatch
 
         public string SeverityColor => Event.Severity switch
         {
-            SeverityLevel.Critical => "#FF0055",
-            SeverityLevel.High => "#FFAA00",
-            SeverityLevel.Medium => "#0ABDC6",
-            _ => "#808080"
+            SeverityLevel.Critical => "#EE3333",
+            SeverityLevel.High => "#FF8833",
+            SeverityLevel.Medium => "#3388FF",
+            _ => "#6A6A80"
         };
 
         public string CategoryIcon => Event.Category switch
@@ -585,7 +585,7 @@ namespace N01D.Overwatch
 
         public string Name => _rule.Name;
         public string StatusText => _rule.Enabled ? "● ACTIVE" : "○ DISABLED";
-        public string StatusColor => _rule.Enabled ? "#00FF41" : "#808080";
+        public string StatusColor => _rule.Enabled ? "#33CC33" : "#6A6A80";
         public string Description =>
             $"Min severity: {_rule.MinSeverity} | Keywords: {string.Join(", ", _rule.Keywords.Take(5))}" +
             (_rule.Keywords.Count > 5 ? $" +{_rule.Keywords.Count - 5} more" : "");
