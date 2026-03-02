@@ -26,12 +26,14 @@ namespace N01D.Overwatch
         private readonly List<ConflictEvent> _allEvents = new();
         private DispatcherTimer? _autoRefreshTimer;
         private bool _isLoading;
+        private bool _initialized;
 
         public MainWindow()
         {
             InitializeComponent();
             lstTimeline.ItemsSource = _timelineItems;
             LoadAlertRules();
+            _initialized = true;
             Loaded += async (_, _) => await RefreshAllAsync();
             InitMap();
         }
@@ -267,6 +269,7 @@ namespace N01D.Overwatch
 
         private void ApplyFilters()
         {
+            if (!_initialized) return;
             var search = txtSearch.Text?.Trim().ToLowerInvariant() ?? "";
             var enabledCategories = new HashSet<EventCategory>();
             if (chkMilitary.IsChecked == true) enabledCategories.Add(EventCategory.Military);
