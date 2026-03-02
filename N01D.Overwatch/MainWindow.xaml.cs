@@ -19,10 +19,10 @@ namespace N01D.Overwatch
         private readonly RssFeedService _rss = new();
         private readonly FlightTrackingService _flights = new();
         private readonly ShipTrackingService _ships = new();
-        private readonly OilPriceService _oil = new();
         private readonly AlertService _alerts = new();
         private readonly EclipseService _eclipse = new();
         private readonly MissileDefenseService _missiles = new();
+        private readonly WarMonitoringService _warOps = new();
 
         private readonly ObservableCollection<EventViewModel> _timelineItems = new();
         private readonly List<ConflictEvent> _allEvents = new();
@@ -63,10 +63,6 @@ namespace N01D.Overwatch
                 var rssTask = _rss.FetchAllAsync();
                 tasks.Add(rssTask);
 
-                // Oil Prices
-                var oilTask = _oil.FetchPricesAsync();
-                tasks.Add(oilTask);
-
                 // Ships
                 var shipTask = _ships.FetchVesselsAsync();
                 tasks.Add(shipTask);
@@ -81,18 +77,6 @@ namespace N01D.Overwatch
                     if (!_allEvents.Any(e => e.Title == ev.Title && e.Source == ev.Source))
                         _allEvents.Add(ev);
                 }
-
-                // Process oil data
-                var oilData = await oilTask;
-                foreach (var o in oilData)
-                {
-                    var ev = _oil.ToConflictEvent(o);
-                    _alerts.EvaluateEvent(ev);
-                    // Replace existing oil events
-                    _allEvents.RemoveAll(e => e.DataSource == DataSource.OilPrice && e.Source == ev.Source);
-                    _allEvents.Add(ev);
-                }
-                UpdateOilPanel(oilData);
 
                 // Process ship data
                 var vessels = await shipTask;
@@ -172,101 +156,46 @@ namespace N01D.Overwatch
             }
         }
 
-        private async void BtnRefreshOil_Click(object sender, RoutedEventArgs e)
+        // ═══════════════════════════════════════════
+        //  WAR OPS MONITORING
+        // ═══════════════════════════════════════════
+
+        private async void BtnScanWarOps_Click(object sender, RoutedEventArgs e)
         {
-            txtStatus.Text = "🛢 Fetching oil prices...";
+            txtStatus.Text = "⚔ Scanning war operations feeds...";
             try
             {
-                var prices = await _oil.FetchPricesAsync();
-                UpdateOilPanel(prices);
-                txtStatus.Text = "🛢 Oil prices updated";
+                var events = await _warOps.FetchAllAsync();
+
+                // Classify and add to timeline
+                foreach (var ev in events)
+                {
+                    _alerts.EvaluateEvent(ev);
+                    if (!_allEvents.Any(e2 => e2.Title == ev.Title && e2.Source == ev.Source))
+                        _allEvents.Add(ev);
+                }
+
+                // Populate sub-tabs
+                var sigacts = events.Where(e2 => e2.Tags.Contains("SIGACT")).Select(e2 => new EventViewModel(e2)).ToList();
+                var sanctions = events.Where(e2 => e2.Tags.Contains("SANCTIONS")).Select(e2 => new EventViewModel(e2)).ToList();
+                var cyberOps = events.Where(e2 => e2.Tags.Contains("CYBER")).Select(e2 => new EventViewModel(e2)).ToList();
+                var proxy = events.Where(e2 => e2.Tags.Contains("PROXY")).Select(e2 => new EventViewModel(e2)).ToList();
+
+                lstSigact.ItemsSource = sigacts;
+                lstSanctions.ItemsSource = sanctions;
+                lstCyberOps.ItemsSource = cyberOps;
+                lstProxy.ItemsSource = proxy;
+
+                var total = events.Count;
+                txtWarOpsCount.Text = $"{total} war actions detected";
+
+                ApplyFilters();
+                UpdateMap();
+                txtStatus.Text = $"⚔ {total} war actions tracked ({sigacts.Count} SIGACT, {sanctions.Count} sanctions, {cyberOps.Count} cyber, {proxy.Count} proxy)";
             }
             catch (Exception ex)
             {
-                txtStatus.Text = $"⚠ Oil price error: {ex.Message}";
-            }
-        }
-
-        // ═══════════════════════════════════════════
-        //  OIL PANEL
-        // ═══════════════════════════════════════════
-
-        private void UpdateOilPanel(List<OilPriceData> prices)
-        {
-            pnlOil.Children.Clear();
-            if (prices.Count == 0)
-            {
-                pnlOil.Children.Add(new TextBlock
-                {
-                    Text = "Unable to fetch oil prices (market may be closed)",
-                    FontFamily = new FontFamily("Consolas"),
-                    FontSize = 13,
-                    Foreground = new SolidColorBrush(Color.FromRgb(128, 128, 128))
-                });
-                return;
-            }
-
-            foreach (var p in prices)
-            {
-                var isUp = p.Change >= 0;
-                var arrow = isUp ? "▲" : "▼";
-                var color = isUp
-                    ? (Math.Abs(p.ChangePercent) > 3 ? "#EE3333" : "#33CC33")
-                    : (Math.Abs(p.ChangePercent) > 3 ? "#EE3333" : "#FF8833");
-
-                var card = new Border
-                {
-                    Background = new SolidColorBrush(Color.FromRgb(0x16, 0x16, 0x25)),
-                    CornerRadius = new CornerRadius(5),
-                    BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(color)!),
-                    BorderThickness = new Thickness(1),
-                    Padding = new Thickness(20, 16, 20, 16),
-                    Margin = new Thickness(0, 0, 0, 12),
-                    Width = 500,
-                    HorizontalAlignment = HorizontalAlignment.Left
-                };
-
-                var sp = new StackPanel();
-                sp.Children.Add(new TextBlock
-                {
-                    Text = p.Name.ToUpperInvariant(),
-                    FontFamily = new FontFamily("Consolas"),
-                    FontSize = 14,
-                    Foreground = new SolidColorBrush(Color.FromRgb(0x33, 0x88, 0xFF)),
-                    FontWeight = FontWeights.Bold
-                });
-
-                var pricePanel = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 8, 0, 0) };
-                pricePanel.Children.Add(new TextBlock
-                {
-                    Text = $"${p.Price:F2}",
-                    FontFamily = new FontFamily("Consolas"),
-                    FontSize = 28,
-                    Foreground = new SolidColorBrush(Color.FromRgb(0xE0, 0xE0, 0xE0)),
-                    FontWeight = FontWeights.Bold
-                });
-                pricePanel.Children.Add(new TextBlock
-                {
-                    Text = $"  {arrow} {p.Change:+0.00;-0.00} ({p.ChangePercent:+0.00;-0.00}%)",
-                    FontFamily = new FontFamily("Consolas"),
-                    FontSize = 16,
-                    Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(color)!),
-                    VerticalAlignment = VerticalAlignment.Bottom,
-                    Margin = new Thickness(10, 0, 0, 4)
-                });
-                sp.Children.Add(pricePanel);
-
-                sp.Children.Add(new TextBlock
-                {
-                    Text = $"Last updated: {p.Timestamp:HH:mm:ss UTC}",
-                    FontFamily = new FontFamily("Consolas"),
-                    FontSize = 10,
-                    Foreground = new SolidColorBrush(Color.FromRgb(128, 128, 128)),
-                    Margin = new Thickness(0, 6, 0, 0)
-                });
-
-                card.Child = sp;
-                pnlOil.Children.Add(card);
+                txtStatus.Text = $"⚠ War ops scan error: {ex.Message}";
             }
         }
 

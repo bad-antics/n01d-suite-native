@@ -311,8 +311,8 @@
                 </Grid>
             </TabItem>
 
-            <!-- OIL TAB -->
-            <TabItem Header="🛢 OIL" Style="{StaticResource XChatTabItem}">
+            <!-- WAR OPS TAB -->
+            <TabItem Header="⚔ WAR OPS" Style="{StaticResource XChatTabItem}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -320,17 +320,116 @@
                     </Grid.RowDefinitions>
                     <Border Grid.Row="0" Background="{StaticResource XChatSurfaceBrush}" Padding="10,6">
                         <DockPanel>
-                            <TextBlock Text="CRUDE OIL MARKET INDICATORS" FontFamily="Consolas"
-                                       FontSize="12" Foreground="{StaticResource XChatBlueBrush}" FontWeight="Bold" VerticalAlignment="Center"/>
-                            <Button Content="⟳ REFRESH" Style="{StaticResource XChatButton}"
-                                    Click="BtnRefreshOil_Click" FontSize="11" HorizontalAlignment="Right"
-                                    DockPanel.Dock="Right"/>
+                            <TextBlock Text="WAR ACTIONS MONITOR — KINETIC &amp; NON-KINETIC OPS" FontFamily="Consolas"
+                                       FontSize="12" Foreground="{StaticResource XChatRedBrush}" FontWeight="Bold" VerticalAlignment="Center"/>
+                            <Button Content="⟳ SCAN" Style="{StaticResource XChatButton}"
+                                    Click="BtnScanWarOps_Click" FontSize="11" HorizontalAlignment="Right"
+                                    DockPanel.Dock="Right" Margin="0,0,10,0"/>
+                            <TextBlock x:Name="txtWarOpsCount" FontFamily="Consolas" FontSize="11"
+                                       Foreground="{StaticResource XChatTextDimBrush}" VerticalAlignment="Center" HorizontalAlignment="Right"
+                                       DockPanel.Dock="Right"/>
                         </DockPanel>
                     </Border>
-                    <StackPanel x:Name="pnlOil" Margin="20" VerticalAlignment="Top">
-                        <TextBlock Text="Loading oil prices..." FontFamily="Consolas" FontSize="13"
-                                   Foreground="{StaticResource XChatTextDimBrush}"/>
-                    </StackPanel>
+
+                    <TabControl Grid.Row="1" Style="{StaticResource XChatTabControl}">
+                        <!-- SIGACT Sub-Tab -->
+                        <TabItem Header="🎯 SIGACT" Style="{StaticResource XChatTabItem}">
+                            <ListBox x:Name="lstSigact" Style="{StaticResource XChatListBox}"
+                                     Background="{StaticResource XChatBackgroundBrush}">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Padding="10,6" Margin="2" CornerRadius="3"
+                                                BorderThickness="0,0,3,0" BorderBrush="{Binding SeverityColor}">
+                                            <StackPanel>
+                                                <DockPanel>
+                                                    <TextBlock Text="{Binding CategoryIcon}" FontSize="12" Margin="0,0,6,0" VerticalAlignment="Center" DockPanel.Dock="Left"/>
+                                                    <TextBlock Text="{Binding SeverityLabel}" FontFamily="Consolas" FontSize="10"
+                                                               Foreground="{Binding SeverityColor}" VerticalAlignment="Center" Margin="0,0,8,0" DockPanel.Dock="Left"/>
+                                                    <TextBlock Text="{Binding TimeAgo}" FontFamily="Consolas" FontSize="10"
+                                                               Foreground="{StaticResource XChatTextDimBrush}" VerticalAlignment="Center"
+                                                               HorizontalAlignment="Right" DockPanel.Dock="Right"/>
+                                                    <TextBlock Text="{Binding Title}" FontFamily="Consolas" FontSize="11"
+                                                               Foreground="{StaticResource XChatTextBrush}" FontWeight="Bold" TextTrimming="CharacterEllipsis"/>
+                                                </DockPanel>
+                                                <TextBlock Text="{Binding Summary}" FontFamily="Consolas" FontSize="10"
+                                                           Foreground="{StaticResource XChatTextDimBrush}" TextWrapping="Wrap"
+                                                           MaxHeight="32" Margin="18,2,0,0"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </TabItem>
+
+                        <!-- Sanctions/Arms Sub-Tab -->
+                        <TabItem Header="📜 SANCTIONS" Style="{StaticResource XChatTabItem}">
+                            <ListBox x:Name="lstSanctions" Style="{StaticResource XChatListBox}"
+                                     Background="{StaticResource XChatBackgroundBrush}">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Padding="10,6" Margin="2" CornerRadius="3"
+                                                BorderThickness="0,0,3,0" BorderBrush="{Binding SeverityColor}">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Title}" FontFamily="Consolas" FontSize="11"
+                                                           Foreground="{StaticResource XChatTextBrush}" FontWeight="Bold"/>
+                                                <TextBlock Text="{Binding Summary}" FontFamily="Consolas" FontSize="10"
+                                                           Foreground="{StaticResource XChatTextDimBrush}" TextWrapping="Wrap"
+                                                           MaxHeight="32" Margin="0,2,0,0"/>
+                                                <TextBlock Text="{Binding Source}" FontFamily="Consolas" FontSize="9"
+                                                           Foreground="{StaticResource XChatCyanBrush}" Margin="0,2,0,0"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </TabItem>
+
+                        <!-- Cyber Sub-Tab -->
+                        <TabItem Header="💻 CYBER" Style="{StaticResource XChatTabItem}">
+                            <ListBox x:Name="lstCyberOps" Style="{StaticResource XChatListBox}"
+                                     Background="{StaticResource XChatBackgroundBrush}">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Padding="10,6" Margin="2" CornerRadius="3"
+                                                BorderThickness="0,0,3,0" BorderBrush="{Binding SeverityColor}">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Title}" FontFamily="Consolas" FontSize="11"
+                                                           Foreground="{StaticResource XChatTextBrush}" FontWeight="Bold"/>
+                                                <TextBlock Text="{Binding Summary}" FontFamily="Consolas" FontSize="10"
+                                                           Foreground="{StaticResource XChatTextDimBrush}" TextWrapping="Wrap"
+                                                           MaxHeight="32" Margin="0,2,0,0"/>
+                                                <TextBlock Text="{Binding Source}" FontFamily="Consolas" FontSize="9"
+                                                           Foreground="{StaticResource XChatCyanBrush}" Margin="0,2,0,0"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </TabItem>
+
+                        <!-- Proxy/Militia Sub-Tab -->
+                        <TabItem Header="🏴 PROXY" Style="{StaticResource XChatTabItem}">
+                            <ListBox x:Name="lstProxy" Style="{StaticResource XChatListBox}"
+                                     Background="{StaticResource XChatBackgroundBrush}">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Padding="10,6" Margin="2" CornerRadius="3"
+                                                BorderThickness="0,0,3,0" BorderBrush="{Binding SeverityColor}">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Title}" FontFamily="Consolas" FontSize="11"
+                                                           Foreground="{StaticResource XChatTextBrush}" FontWeight="Bold"/>
+                                                <TextBlock Text="{Binding Summary}" FontFamily="Consolas" FontSize="10"
+                                                           Foreground="{StaticResource XChatTextDimBrush}" TextWrapping="Wrap"
+                                                           MaxHeight="32" Margin="0,2,0,0"/>
+                                                <TextBlock Text="{Binding Source}" FontFamily="Consolas" FontSize="9"
+                                                           Foreground="{StaticResource XChatCyanBrush}" Margin="0,2,0,0"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </TabItem>
+                    </TabControl>
                 </Grid>
             </TabItem>
 
