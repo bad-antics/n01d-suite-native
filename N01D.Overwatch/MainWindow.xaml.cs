@@ -24,6 +24,8 @@ namespace N01D.Overwatch
         private readonly MissileDefenseService _missiles = new();
         private readonly WarMonitoringService _warOps = new();
         private readonly EquipmentDatabaseService _equipment = new();
+        private readonly RadioStreamService _radio = new();
+        private readonly GroundTrackingService _ground = new();
 
         private readonly ObservableCollection<EventViewModel> _timelineItems = new();
         private readonly List<ConflictEvent> _allEvents = new();
@@ -46,6 +48,8 @@ namespace N01D.Overwatch
             LoadEclipseData();
             LoadMissileDefenseData();
             LoadEquipmentData();
+            LoadRadioStreams();
+            LoadGroundData();
             _initialized = true;
             Loaded += async (_, _) => await RefreshAllAsync();
             InitMap();
@@ -493,6 +497,7 @@ namespace N01D.Overwatch
                 UpdateMapMissiles();
                 UpdateMapDefense();
                 UpdateMapEclipses();
+                UpdateMapGround();
             }
             catch { }
         }
@@ -633,8 +638,13 @@ namespace N01D.Overwatch
                     <label class="layer-toggle"><input type="checkbox" id="togPipelines" checked onchange="toggleLayer('pipelines')"> 🛢 Oil Routes</label>
                     <label class="layer-toggle"><input type="checkbox" id="togMissiles" checked onchange="toggleLayer('missiles')"> 🚀 Missile Sites</label>
                     <label class="layer-toggle"><input type="checkbox" id="togDefense" checked onchange="toggleLayer('defense')"> 🛡 Air Defense</label>
-                    <label class="layer-toggle"><input type="checkbox" id="togEquipment" onchange="toggleLayer('equipment')"> ⚙ Equipment</label>
-                    <label class="layer-toggle"><input type="checkbox" id="togEclipse" onchange="toggleLayer('eclipse')"> 🌑 Eclipse Paths</label>
+                    <label class=""layer-toggle""><input type=""checkbox"" id=""togEquipment"" onchange=""toggleLayer('equipment')""> ⚙ Equipment</label>
+                    <label class=""layer-toggle""><input type=""checkbox"" id=""togGround"" checked onchange=""toggleLayer('ground')""> 🪖 Ground Flocks</label>
+                    <label class=""layer-toggle""><input type=""checkbox"" id=""togHotspots"" checked onchange=""toggleLayer('hotspots')""> 🔥 Thermal</label>
+                    <label class=""layer-toggle""><input type=""checkbox"" id=""togCheckpoints"" checked onchange=""toggleLayer('checkpoints')""> 🛑 Checkpoints</label>
+                    <label class=""layer-toggle""><input type=""checkbox"" id=""togConflict"" checked onchange=""toggleLayer('conflict')""> 💥 Conflict Zones</label>
+                    <label class=""layer-toggle""><input type=""checkbox"" id=""togCorridors"" onchange=""toggleLayer('corridors')""> 🏕 IDP Corridors</label>
+                    <label class=""layer-toggle""><input type=""checkbox"" id=""togEclipse"" onchange=""toggleLayer('eclipse')""> 🌑 Eclipse Paths</label>
                     <label class="layer-toggle"><input type="checkbox" id="togHeatmap" onchange="toggleLayer('heatmap')"> 🔥 Event Density</label>
                 </div>
 
@@ -650,9 +660,13 @@ namespace N01D.Overwatch
                     <div class="stat-row"><span>Events plotted:</span><span class="stat-val" id="statEvents">0</span></div>
                     <div class="stat-row"><span>Aircraft tracked:</span><span class="stat-val" id="statFlights">0</span></div>
                     <div class="stat-row"><span>Equipment assets:</span><span class="stat-val" id="statEquipment" style="color:#FF8833">0</span></div>
+                    <div class="stat-row"><span>Ground flocks:</span><span class="stat-val" id="statGround" style="color:#DDCC33">0</span></div>
                     <div class="stat-row"><span>Critical zones:</span><span class="stat-val" id="statZones" style="color:#EE3333">5</span></div>
                     <div class="stat-row"><span>Missile sites:</span><span class="stat-val" id="statMissiles" style="color:#FF8833">0</span></div>
                     <div class="stat-row"><span>Defense systems:</span><span class="stat-val" id="statDefense" style="color:#33CCCC">0</span></div>
+                    <div class="stat-row"><span>Ground flocks:</span><span class="stat-val" id="statFlocks" style="color:#33CC33">0</span></div>
+                    <div class="stat-row"><span>Conflict zones:</span><span class="stat-val" id="statConflict" style="color:#EE3333">0</span></div>
+                    <div class="stat-row"><span>Thermal hotspots:</span><span class="stat-val" id="statHotspots" style="color:#FF5555">0</span></div>
                     <div class="stat-row"><span>Coverage area:</span><span class="stat-val">3.2M km²</span></div>
                 </div>
 
@@ -671,7 +685,17 @@ namespace N01D.Overwatch
                     <div class="legend-item"><span class="legend-line" style="border-color:#EE3333"></span> Chokepoint</div>
                     <div class="legend-item"><span class="legend-dot" style="background:#FF5555"></span> 🚀 Missile Site</div>
                     <div class="legend-item"><span class="legend-dot" style="background:#33CCCC;border:2px solid #33CCCC;width:6px;height:6px"></span> 🛡 Air Defense</div>
+                    <div class="legend-item"><span class="legend-dot" style="background:#33CC33"></span> 🪖 Ground Flock</div>
+                    <div class="legend-item"><span class="legend-dot" style="background:#FF5555"></span> 🔥 Thermal Hotspot</div>
+                    <div class="legend-item"><span class="legend-line" style="border-color:#FF333388;border-top-style:solid"></span> Conflict Zone</div>
+                    <div class="legend-item"><span class="legend-line" style="border-color:#AA55FF;border-top-style:dashed"></span> IDP Corridor</div>
                     <div class="legend-item"><span class="legend-line" style="border-color:#DDCC33;border-top-style:dotted"></span> Eclipse Path</div>
+                    <h4 style="margin-top:10px">GROUND</h4>
+                    <div class="legend-item"><span class="legend-dot" style="background:#FF8833"></span> 🪖 Force Cluster</div>
+                    <div class="legend-item"><span class="legend-dot" style="background:#EE333388;border:2px dashed #EE3333"></span> 🎯 Conflict Zone</div>
+                    <div class="legend-item"><span class="legend-dot" style="background:#DDCC33;width:6px;height:6px"></span> 🔥 Thermal</div>
+                    <div class="legend-item"><span class="legend-dot" style="background:#33CCCC"></span> 🏴 Checkpoint</div>
+                    <div class="legend-item"><span class="legend-line" style="border-color:#AA55FF;border-top-style:dashed"></span> 🏕 IDP Corridor</div>
                 </div>
 
                 <script>
@@ -707,6 +731,11 @@ namespace N01D.Overwatch
                     var eclipseLayer = L.layerGroup();
                     var heatmapLayer = L.layerGroup();
                     var equipmentLayer = L.layerGroup();
+                    var groundLayer = L.layerGroup().addTo(map);
+                    var hotspotLayer = L.layerGroup().addTo(map);
+                    var checkpointLayer = L.layerGroup().addTo(map);
+                    var conflictLayer = L.layerGroup().addTo(map);
+                    var corridorLayer = L.layerGroup();
 
                     var layers = {
                         events: eventLayer,
@@ -718,7 +747,12 @@ namespace N01D.Overwatch
                         defense: defenseLayer,
                         eclipse: eclipseLayer,
                         heatmap: heatmapLayer,
-                        equipment: equipmentLayer
+                        equipment: equipmentLayer,
+                        ground: groundLayer,
+                        hotspots: hotspotLayer,
+                        checkpoints: checkpointLayer,
+                        conflict: conflictLayer,
+                        corridors: corridorLayer
                     };
 
                     function toggleLayer(name) {
@@ -1201,6 +1235,222 @@ namespace N01D.Overwatch
                     }
 
                     // ═══════════════════════════════════════
+                    //  GROUND FLOCK TRACKING (called from C#)
+                    // ═══════════════════════════════════════
+
+                    function updateGroundFlocks(data) {
+                        groundLayer.clearLayers();
+                        var count = 0;
+
+                        data.forEach(function(f) {
+                            count++;
+
+                            // Force deployment radius circle
+                            L.circle([f.lat, f.lon], {
+                                radius: f.r * 1000,
+                                color: f.color,
+                                fillColor: f.color,
+                                fillOpacity: 0.06,
+                                weight: 1.5,
+                                dashArray: '6,4',
+                                opacity: 0.6
+                            }).addTo(groundLayer);
+
+                            // Flock marker
+                            var flockIcon = L.divIcon({
+                                className: 'ground-marker',
+                                html: '<div style="font-size:16px;text-shadow:0 0 8px ' + f.color + '80;cursor:pointer" title="' + f.name + '">' + f.icon + '</div>',
+                                iconSize: [18, 18], iconAnchor: [9, 9]
+                            });
+                            var marker = L.marker([f.lat, f.lon], { icon: flockIcon });
+
+                            var popupHtml = '<div class="event-popup">' +
+                                '<div class="popup-header" style="background:' + f.color + '22;color:' + f.color + ';border-bottom:1px solid ' + f.color + '44">' +
+                                f.flag + ' ' + f.name + '</div>' +
+                                '<div class="popup-body">' +
+                                '<div style="margin-bottom:6px">' +
+                                '<span class="sev-badge" style="background:' + f.color + '44;color:' + f.color + ';border:1px solid ' + f.color + '66">' + f.type + '</span>' +
+                                ' <span style="color:#6A6A80;font-size:10px">' + f.force + '</span>' +
+                                '</div>' +
+                                '<div style="font-size:11px">' + f.desc + '</div>' +
+                                '<div style="margin-top:6px;font-size:10px;color:#FF8833">Strength: ' + f.strength + '</div>' +
+                                '<div style="font-size:10px;color:#33CCCC">Equipment: ' + f.equip + '</div>' +
+                                '<div class="meta">' + f.country + ' | Radius: ' + f.r + 'km</div>' +
+                                '<div class="meta">Lat: ' + f.lat.toFixed(3) + ' | Lon: ' + f.lon.toFixed(3) + '</div>' +
+                                '<div style="margin-top:8px">' +
+                                '<a class="open-link" href="#" onclick="openGroundEye(' + f.lat + ',' + f.lon + '); return false;">📷 GROUND EYE VIEW</a>' +
+                                '</div>' +
+                                '</div></div>';
+
+                            marker.bindPopup(popupHtml, { maxWidth: 450, className: 'dark-popup' });
+                            marker.on('click', function() {
+                                try { window.chrome.webview.postMessage(JSON.stringify({ type: 'selectFlock', id: f.name })); } catch(e) {}
+                            });
+                            groundLayer.addLayer(marker);
+                        });
+
+                        document.getElementById('statGround').textContent = count;
+                    }
+
+                    function updateConflictZones(data) {
+                        data.forEach(function(z) {
+                            // Conflict zone — pulsing dashed circle
+                            var zone = L.circle([z.lat, z.lon], {
+                                radius: z.r * 1000,
+                                color: z.color,
+                                fillColor: z.color,
+                                fillOpacity: 0.08,
+                                weight: 2,
+                                dashArray: '10,6',
+                                opacity: 0.7
+                            });
+
+                            var popupHtml = '<div class="event-popup">' +
+                                '<div class="popup-header" style="background:' + z.color + '22;color:' + z.color + ';border-bottom:1px solid ' + z.color + '44">' +
+                                '🎯 ' + z.name + '</div>' +
+                                '<div class="popup-body">' +
+                                '<div style="margin-bottom:6px"><span class="sev-badge" style="background:' + z.color + '44;color:' + z.color + ';border:1px solid ' + z.color + '66">' + z.intensity + '</span></div>' +
+                                '<div>' + z.desc + '</div>' +
+                                '<div style="margin-top:6px;font-size:10px;color:#FF8833">Belligerents: ' + z.belligerents + '</div>' +
+                                '<div class="meta">Lat: ' + z.lat.toFixed(3) + ' | Lon: ' + z.lon.toFixed(3) + ' | Radius: ' + z.r + 'km</div>' +
+                                '<div style="margin-top:8px">' +
+                                '<a class="open-link" href="#" onclick="openGroundEye(' + z.lat + ',' + z.lon + '); return false;">📷 GROUND EYE VIEW</a>' +
+                                '</div>' +
+                                '</div></div>';
+
+                            zone.bindPopup(popupHtml, { maxWidth: 400, className: 'dark-popup' });
+                            groundLayer.addLayer(zone);
+                        });
+                    }
+
+                    function updateHotspots(data) {
+                        data.forEach(function(h) {
+                            var color = h.confidence >= 80 ? '#EE3333' : (h.confidence >= 60 ? '#FF8833' : '#DDCC33');
+                            var radius = 3 + (h.confidence / 20);
+
+                            // Thermal glow
+                            L.circleMarker([h.lat, h.lon], {
+                                radius: radius + 6,
+                                color: color,
+                                fillColor: color,
+                                fillOpacity: 0.15,
+                                weight: 0,
+                                interactive: false
+                            }).addTo(groundLayer);
+
+                            var hotspot = L.circleMarker([h.lat, h.lon], {
+                                radius: radius,
+                                color: color,
+                                fillColor: color,
+                                fillOpacity: 0.85,
+                                weight: 1.5
+                            });
+
+                            var popupHtml = '<div class="event-popup">' +
+                                '<div class="popup-header" style="background:' + color + '22;color:' + color + ';border-bottom:1px solid ' + color + '44">' +
+                                '🔥 ' + h.name + '</div>' +
+                                '<div class="popup-body">' +
+                                '<div>' + h.desc + '</div>' +
+                                '<div style="margin-top:6px;font-size:10px;color:#33CCCC">Confidence: ' + h.confidence + '% | Brightness: ' + h.brightness + 'K</div>' +
+                                '<div style="font-size:10px;color:#AA55FF">Source: ' + h.source + ' (' + h.satellite + ')</div>' +
+                                '<div class="meta">Detected: ' + h.time + '</div>' +
+                                '<div style="margin-top:8px">' +
+                                '<a class="open-link" href="#" onclick="openGroundEye(' + h.lat + ',' + h.lon + '); return false;">📷 GROUND EYE VIEW</a>' +
+                                '</div>' +
+                                '</div></div>';
+
+                            hotspot.bindPopup(popupHtml, { maxWidth: 380, className: 'dark-popup' });
+                            groundLayer.addLayer(hotspot);
+                        });
+                    }
+
+                    function updateCheckpoints(data) {
+                        data.forEach(function(c) {
+                            var cpIcon = L.divIcon({
+                                className: 'checkpoint-marker',
+                                html: '<div style="font-size:14px;text-shadow:0 0 6px ' + c.color + '80;cursor:pointer" title="' + c.name + '">' + c.icon + '</div>',
+                                iconSize: [16, 16], iconAnchor: [8, 8]
+                            });
+                            var marker = L.marker([c.lat, c.lon], { icon: cpIcon });
+
+                            var popupHtml = '<div class="event-popup">' +
+                                '<div class="popup-header" style="background:' + c.color + '22;color:' + c.color + ';border-bottom:1px solid ' + c.color + '44">' +
+                                c.icon + ' ' + c.name + '</div>' +
+                                '<div class="popup-body">' +
+                                '<div style="margin-bottom:6px"><span class="sev-badge" style="background:' + c.color + '44;color:' + c.color + ';border:1px solid ' + c.color + '66">' + c.type + '</span></div>' +
+                                '<div>' + c.desc + '</div>' +
+                                '<div class="meta">Controller: ' + c.controller + '</div>' +
+                                '<div class="meta">Lat: ' + c.lat.toFixed(3) + ' | Lon: ' + c.lon.toFixed(3) + '</div>' +
+                                '<div style="margin-top:8px">' +
+                                '<a class="open-link" href="#" onclick="openGroundEye(' + c.lat + ',' + c.lon + '); return false;">📷 GROUND EYE VIEW</a>' +
+                                '</div>' +
+                                '</div></div>';
+
+                            marker.bindPopup(popupHtml, { maxWidth: 380, className: 'dark-popup' });
+                            groundLayer.addLayer(marker);
+                        });
+                    }
+
+                    function updateCorridors(data) {
+                        data.forEach(function(c) {
+                            // IDP displacement corridor line
+                            var path = L.polyline([[c.startLat, c.startLon], [c.endLat, c.endLon]], {
+                                color: '#AA55FF',
+                                weight: 3,
+                                dashArray: '8,6',
+                                opacity: 0.6
+                            });
+
+                            // Arrow direction (wider transparent shadow)
+                            L.polyline([[c.startLat, c.startLon], [c.endLat, c.endLon]], {
+                                color: '#AA55FF',
+                                weight: 20,
+                                opacity: 0.04,
+                                interactive: false
+                            }).addTo(groundLayer);
+
+                            var popupHtml = '<div class="event-popup">' +
+                                '<div class="popup-header" style="background:#AA55FF22;color:#AA55FF;border-bottom:1px solid #AA55FF44">' +
+                                '🏕 ' + c.name + '</div>' +
+                                '<div class="popup-body">' +
+                                '<div>' + c.desc + '</div>' +
+                                '<div style="margin-top:6px;font-size:10px;color:#EE3333">Displaced: ' + c.persons.toLocaleString() + ' persons</div>' +
+                                '<div style="font-size:10px;color:#DDCC33">Status: ' + c.status + '</div>' +
+                                '</div></div>';
+
+                            path.bindPopup(popupHtml, { maxWidth: 380, className: 'dark-popup' });
+                            groundLayer.addLayer(path);
+
+                            // Start marker
+                            var startIcon = L.divIcon({
+                                className: 'idp-start',
+                                html: '<div style="font-size:12px;text-shadow:0 0 6px #AA55FF80">🏕</div>',
+                                iconSize: [14, 14], iconAnchor: [7, 7]
+                            });
+                            L.marker([c.startLat, c.startLon], { icon: startIcon })
+                              .bindPopup(popupHtml, { maxWidth: 380, className: 'dark-popup' })
+                              .addTo(groundLayer);
+                        });
+                    }
+
+                    // ═══════════════════════════════════════
+                    //  GROUND EYE VIEW (Street-level camera)
+                    // ═══════════════════════════════════════
+
+                    function openGroundEye(lat, lon) {
+                        try {
+                            window.chrome.webview.postMessage(JSON.stringify({
+                                type: 'groundEye',
+                                lat: lat,
+                                lon: lon
+                            }));
+                        } catch(e) {
+                            // Fallback: open Google Maps street view in new tab
+                            window.open('https://www.google.com/maps/@' + lat + ',' + lon + ',3a,75y,0h,90t/data=!3m6!1e1!3m4!1s!2e0!7i16384!8i8192', '_blank');
+                        }
+                    }
+
+                    // ═══════════════════════════════════════
                     //  LIVE STATUS INDICATOR (called from C#)
                     // ═══════════════════════════════════════
 
@@ -1210,12 +1460,210 @@ namespace N01D.Overwatch
                             el.style.display = 'block';
                             document.getElementById('liveFlightCount').textContent = flightCount;
                             document.getElementById('liveCycleCount').textContent = cycleCount;
-                            // Flash border
                             el.style.borderColor = '#33CC33';
                             setTimeout(function() { el.style.borderColor = '#33CC3366'; }, 500);
                         } else {
                             el.style.display = 'none';
                         }
+                    }
+
+                    // ═══════════════════════════════════════
+                    //  GROUND FLOCKS (called from C#)
+                    // ═══════════════════════════════════════
+
+                    function updateFlocks(data) {
+                        groundLayer.clearLayers();
+                        var count = 0;
+
+                        data.forEach(function(f) {
+                            count++;
+
+                            // Flock area circle
+                            L.circle([f.lat, f.lon], {
+                                radius: f.r * 1000,
+                                color: f.color,
+                                fillColor: f.color,
+                                fillOpacity: 0.06,
+                                weight: 1.5,
+                                dashArray: '8,4',
+                                opacity: 0.5
+                            }).addTo(groundLayer);
+
+                            // Flock marker
+                            var fIcon = L.divIcon({
+                                className: 'flock-marker',
+                                html: '<div style=""font-size:16px;text-shadow:0 0 8px ' + f.color + '80"" title=""' + f.name + '"">' + f.icon + '</div>',
+                                iconSize: [18, 18], iconAnchor: [9, 9]
+                            });
+                            var marker = L.marker([f.lat, f.lon], { icon: fIcon });
+
+                            var popupHtml = '<div class=""event-popup"">' +
+                                '<div class=""popup-header"" style=""background:' + f.color + '22;color:' + f.color + ';border-bottom:1px solid ' + f.color + '44"">' +
+                                f.flag + ' ' + f.name + '</div>' +
+                                '<div class=""popup-body"">' +
+                                '<div style=""margin-bottom:6px"">' +
+                                '<span class=""sev-badge"" style=""background:' + f.color + '44;color:' + f.color + ';border:1px solid ' + f.color + '66"">' + f.type + '</span>' +
+                                ' <span style=""color:#6A6A80;font-size:10px"">' + f.country + '</span></div>' +
+                                '<div>' + f.desc + '</div>' +
+                                '<div style=""margin-top:6px;font-size:10px;color:#33CCCC"">Force: ' + f.force + '</div>' +
+                                '<div style=""font-size:10px;color:#FF8833"">Strength: ' + f.strength + '</div>' +
+                                '<div style=""font-size:10px;color:#DDCC33"">Equipment: ' + f.equip + '</div>' +
+                                '<div style=""font-size:10px;color:#AA55FF"">Radius: ' + f.r + ' km</div>' +
+                                '<div class=""meta"">Lat: ' + f.lat.toFixed(3) + ' | Lon: ' + f.lon.toFixed(3) + '</div>' +
+                                '</div></div>';
+
+                            marker.bindPopup(popupHtml, { maxWidth: 420, className: 'dark-popup' });
+                            marker.on('click', function() {
+                                try { window.chrome.webview.postMessage(JSON.stringify({ type: 'selectGround', id: f.name })); } catch(e) {}
+                            });
+                            groundLayer.addLayer(marker);
+                        });
+
+                        document.getElementById('statFlocks').textContent = count;
+                    }
+
+                    // ═══════════════════════════════════════
+                    //  CONFLICT ZONES (called from C#)
+                    // ═══════════════════════════════════════
+
+                    function updateConflictZones(data) {
+                        conflictLayer.clearLayers();
+                        var count = 0;
+
+                        data.forEach(function(z) {
+                            count++;
+                            // Pulsing conflict area
+                            L.circle([z.lat, z.lon], {
+                                radius: z.r * 1000,
+                                color: z.color,
+                                fillColor: z.color,
+                                fillOpacity: 0.1,
+                                weight: 2,
+                                dashArray: '4,4',
+                                opacity: 0.7
+                            }).bindPopup('<div class=""event-popup"">' +
+                                '<div class=""popup-header"" style=""background:' + z.color + '22;color:' + z.color + ';border-bottom:1px solid ' + z.color + '44"">' +
+                                '💥 ' + z.name + '</div>' +
+                                '<div class=""popup-body"">' +
+                                '<div style=""margin-bottom:6px""><span class=""sev-badge"" style=""background:' + z.color + '44;color:' + z.color + ';border:1px solid ' + z.color + '66"">' + z.intensity + '</span></div>' +
+                                '<div>' + z.desc + '</div>' +
+                                '<div style=""margin-top:6px;font-size:10px;color:#FF8833"">Belligerents: ' + z.belligerents + '</div>' +
+                                '<div class=""meta"">Radius: ' + z.r + ' km</div>' +
+                                '</div></div>', { maxWidth: 380, className: 'dark-popup' })
+                            .addTo(conflictLayer);
+                        });
+
+                        document.getElementById('statConflict').textContent = count;
+                    }
+
+                    // ═══════════════════════════════════════
+                    //  THERMAL HOTSPOTS (called from C#)
+                    // ═══════════════════════════════════════
+
+                    function updateHotspots(data) {
+                        hotspotLayer.clearLayers();
+                        var count = 0;
+
+                        data.forEach(function(h) {
+                            count++;
+                            var radius = h.confidence >= 80 ? 8 : (h.confidence >= 60 ? 6 : 4);
+
+                            // Glow effect
+                            if (h.confidence >= 80) {
+                                L.circleMarker([h.lat, h.lon], {
+                                    radius: 20, color: h.color, fillColor: h.color,
+                                    fillOpacity: 0.15, weight: 0
+                                }).addTo(hotspotLayer);
+                            }
+
+                            L.circleMarker([h.lat, h.lon], {
+                                radius: radius, color: h.color, fillColor: h.color,
+                                fillOpacity: 0.9, weight: 1.5
+                            }).bindPopup('<div class=""event-popup"">' +
+                                '<div class=""popup-header"" style=""background:' + h.color + '22;color:' + h.color + ';border-bottom:1px solid ' + h.color + '44"">' +
+                                '🔥 ' + h.name + '</div>' +
+                                '<div class=""popup-body"">' +
+                                '<div>' + h.desc + '</div>' +
+                                '<div style=""margin-top:6px;font-size:10px;color:#EE3333"">Brightness: ' + h.brightness + 'K | Confidence: ' + h.confidence + '%</div>' +
+                                '<div style=""font-size:10px;color:#33CCCC"">Source: ' + h.source + ' (' + h.satellite + ')</div>' +
+                                '<div class=""meta"">' + h.time + '</div>' +
+                                '</div></div>', { maxWidth: 350, className: 'dark-popup' })
+                            .addTo(hotspotLayer);
+                        });
+
+                        document.getElementById('statHotspots').textContent = count;
+                    }
+
+                    // ═══════════════════════════════════════
+                    //  CHECKPOINTS / FOBs (called from C#)
+                    // ═══════════════════════════════════════
+
+                    function updateCheckpoints(data) {
+                        checkpointLayer.clearLayers();
+
+                        data.forEach(function(c) {
+                            var cpIcon = L.divIcon({
+                                className: 'checkpoint-marker',
+                                html: '<div style=""font-size:14px;text-shadow:0 0 6px ' + c.color + '80"" title=""' + c.name + '"">' + c.icon + '</div>',
+                                iconSize: [16, 16], iconAnchor: [8, 8]
+                            });
+
+                            L.marker([c.lat, c.lon], { icon: cpIcon })
+                              .bindPopup('<div class=""event-popup"">' +
+                                '<div class=""popup-header"" style=""background:' + c.color + '22;color:' + c.color + ';border-bottom:1px solid ' + c.color + '44"">' +
+                                c.icon + ' ' + c.name + '</div>' +
+                                '<div class=""popup-body"">' +
+                                '<div style=""margin-bottom:6px""><span class=""sev-badge"" style=""background:#3388FF44;color:#3388FF;border:1px solid #3388FF66"">' + c.type + '</span></div>' +
+                                '<div>' + c.desc + '</div>' +
+                                '<div style=""margin-top:6px;font-size:10px;color:#FF8833"">Controller: ' + c.controller + '</div>' +
+                                '<div class=""meta"">Lat: ' + c.lat.toFixed(3) + ' | Lon: ' + c.lon.toFixed(3) + '</div>' +
+                                '</div></div>', { maxWidth: 380, className: 'dark-popup' })
+                              .addTo(checkpointLayer);
+                        });
+                    }
+
+                    // ═══════════════════════════════════════
+                    //  IDP CORRIDORS (called from C#)
+                    // ═══════════════════════════════════════
+
+                    function updateCorridors(data) {
+                        corridorLayer.clearLayers();
+
+                        data.forEach(function(c) {
+                            // Displacement path
+                            var path = L.polyline([[c.startLat, c.startLon], [c.endLat, c.endLon]], {
+                                color: '#AA55FF',
+                                weight: 3,
+                                dashArray: '10,6',
+                                opacity: 0.6
+                            });
+
+                            // Arrow markers at endpoints
+                            var startIcon = L.divIcon({
+                                className: 'corridor-start',
+                                html: '<div style=""font-size:12px;text-shadow:0 0 4px #AA55FF80"">🏚</div>',
+                                iconSize: [14, 14], iconAnchor: [7, 7]
+                            });
+                            var endIcon = L.divIcon({
+                                className: 'corridor-end',
+                                html: '<div style=""font-size:12px;text-shadow:0 0 4px #AA55FF80"">🏕</div>',
+                                iconSize: [14, 14], iconAnchor: [7, 7]
+                            });
+
+                            var popupHtml = '<div class=""event-popup"">' +
+                                '<div class=""popup-header"" style=""background:#AA55FF22;color:#AA55FF;border-bottom:1px solid #AA55FF44"">' +
+                                '🏕 ' + c.name + '</div>' +
+                                '<div class=""popup-body"">' +
+                                '<div>' + c.desc + '</div>' +
+                                '<div style=""margin-top:6px;font-size:10px;color:#FF8833"">Displaced: ' + c.persons.toLocaleString() + '</div>' +
+                                '<div style=""font-size:10px;color:#33CC33"">Status: ' + c.status + '</div>' +
+                                '</div></div>';
+
+                            path.bindPopup(popupHtml, { maxWidth: 350, className: 'dark-popup' });
+                            corridorLayer.addLayer(path);
+                            L.marker([c.startLat, c.startLon], { icon: startIcon }).bindPopup(popupHtml).addTo(corridorLayer);
+                            L.marker([c.endLat, c.endLon], { icon: endIcon }).bindPopup(popupHtml).addTo(corridorLayer);
+                        });
                     }
 
                     // ═══════════════════════════════════════
@@ -1570,6 +2018,523 @@ namespace N01D.Overwatch
             {
                 dgEquipment.ItemsSource = _equipment.GetEquipmentByCountry(vm.Country);
             }
+        }
+
+        // ═══════════════════════════════════════════
+        //  WARZONE RADIO STREAMS
+        // ═══════════════════════════════════════════
+
+        private void LoadRadioStreams()
+        {
+            var streams = _radio.GetAllStreams();
+            dgRadio.ItemsSource = streams;
+
+            var stats = _radio.GetStats();
+            txtRadioStats.Text = $"{stats.Total} streams | {stats.Live} live | " +
+                                 $"📡 {stats.News} news | 🌍 {stats.Regional} regional | " +
+                                 $"🎖 {stats.Military} mil briefs | 📻 {stats.Scanner} scanner | 🏥 {stats.Humanitarian} humanitarian";
+        }
+
+        private void CmbRadioFilter_Changed(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_initialized) return;
+            if (cmbRadioFilter.SelectedItem is ComboBoxItem item)
+            {
+                var filter = item.Content?.ToString() ?? "ALL";
+                List<RadioStream> filtered;
+
+                if (filter == "ALL")
+                    filtered = _radio.GetAllStreams();
+                else if (filter == "LIVE ONLY")
+                    filtered = _radio.GetLiveStreams();
+                else if (Enum.TryParse<RadioCategory>(filter.Replace(" ", ""), true, out var cat))
+                    filtered = _radio.GetByCategory(cat);
+                else
+                    filtered = _radio.GetAllStreams();
+
+                dgRadio.ItemsSource = filtered;
+            }
+        }
+
+        private void BtnOpenStream_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.DataContext is RadioStream stream)
+            {
+                try
+                {
+                    var url = !string.IsNullOrEmpty(stream.WebUrl) ? stream.WebUrl : stream.Url;
+                    if (!string.IsNullOrEmpty(url))
+                    {
+                        Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+                        txtStatus.Text = $"📻 Opened: {stream.Name}";
+                    }
+                }
+                catch { }
+            }
+        }
+
+        private void DgRadio_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (dgRadio.SelectedItem is RadioStream stream)
+            {
+                txtRadioDetail.Text = $"{stream.Name}\n{stream.Description}\n\nRegion: {stream.Region}\n" +
+                                      $"Language: {stream.Language}\nCategory: {stream.CategoryDisplay}\n" +
+                                      $"Status: {stream.StatusDisplay}\n\n" +
+                                      (string.IsNullOrEmpty(stream.Url) ? "Web access only — click OPEN to launch" : $"Stream: {stream.Url}");
+            }
+        }
+
+        // ═══════════════════════════════════════════
+        //  GROUND FLOCK TRACKING
+        // ═══════════════════════════════════════════
+
+        private void LoadGroundData()
+        {
+            var flocks = _ground.GetAllFlocks();
+            dgFlocks.ItemsSource = flocks;
+
+            var zones = _ground.GetAllConflictZones();
+            dgConflictZones.ItemsSource = zones;
+
+            var hotspots = _ground.GetAllHotspots();
+            dgThermal.ItemsSource = hotspots;
+
+            var checkpoints = _ground.GetAllCheckpoints();
+            dgCheckpoints.ItemsSource = checkpoints;
+
+            var corridors = _ground.GetAllCorridors();
+            dgCorridors.ItemsSource = corridors;
+
+            var stats = _ground.GetStats();
+            txtGroundStats.Text = $"{stats.ActiveFlocks} active flocks | {stats.ConflictZones} conflict zones ({stats.HighIntensityZones} HIGH) | " +
+                                  $"{stats.ThermalHotspots} thermal hotspots | {stats.Checkpoints} checkpoints/FOBs | " +
+                                  $"{stats.IdpCorridors} IDP corridors ({stats.TotalDisplaced:N0} displaced) | {stats.Countries} countries";
+        }
+
+        private void CmbGroundFilter_Changed(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_initialized) return;
+            if (cmbGroundFilter.SelectedItem is ComboBoxItem item)
+            {
+                var filter = item.Content?.ToString() ?? "ALL";
+                List<GroundFlock> filtered;
+
+                if (filter == "ALL")
+                    filtered = _ground.GetAllFlocks();
+                else if (filter == "ACTIVE ONLY")
+                    filtered = _ground.GetActiveFlocks();
+                else if (Enum.TryParse<GroundFlockType>(filter.Replace(" ", ""), true, out var type))
+                    filtered = _ground.GetFlocksByType(type);
+                else
+                    filtered = _ground.GetAllFlocks();
+
+                dgFlocks.ItemsSource = filtered;
+            }
+        }
+
+        private void BtnShowGroundOnMap_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                UpdateMapGround();
+                tabMain.SelectedIndex = 1; // Switch to Map
+                webMap.CoreWebView2?.ExecuteScriptAsync("flyTo(30, 44, 5)");
+                txtStatus.Text = $"🪖 Ground flocks, conflict zones, hotspots, and checkpoints displayed on map";
+            }
+            catch { }
+        }
+
+        private void UpdateMapGround()
+        {
+            try
+            {
+                var flockData = _ground.BuildFlockMapData();
+                webMap.CoreWebView2?.ExecuteScriptAsync($"updateGroundFlocks([{flockData}])");
+
+                var zoneData = _ground.BuildConflictZoneMapData();
+                webMap.CoreWebView2?.ExecuteScriptAsync($"updateConflictZones([{zoneData}])");
+
+                var hotspotData = _ground.BuildHotspotMapData();
+                webMap.CoreWebView2?.ExecuteScriptAsync($"updateHotspots([{hotspotData}])");
+
+                var checkpointData = _ground.BuildCheckpointMapData();
+                webMap.CoreWebView2?.ExecuteScriptAsync($"updateCheckpoints([{checkpointData}])");
+
+                var corridorData = _ground.BuildCorridorMapData();
+                webMap.CoreWebView2?.ExecuteScriptAsync($"updateCorridors([{corridorData}])");
+            }
+            catch { }
+        }
+
+        private void DgFlocks_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (dgFlocks.SelectedItem is GroundFlock flock)
+            {
+                txtGroundDetail.Text = $"{flock.ForceFlag} {flock.Name}\n" +
+                                       $"Force: {flock.Force}\nCountry: {flock.Country}\n" +
+                                       $"Type: {flock.TypeDisplay}\nThreat: {flock.ThreatDisplay}\n" +
+                                       $"Strength: {flock.EstimatedStrength}\nRadius: {flock.RadiusKm} km\n\n" +
+                                       $"Equipment: {flock.Equipment}\n\n" +
+                                       $"{flock.Description}\n\n" +
+                                       $"Coords: {flock.Latitude:F3}, {flock.Longitude:F3}\nUpdated: {flock.AgeDisplay}";
+
+                // Load embedded ground eye preview
+                LoadEmbeddedGroundEye(flock.Latitude, flock.Longitude, flock.Name);
+
+                // Fly to location on map
+                try
+                {
+                    webMap.CoreWebView2?.ExecuteScriptAsync($"flyTo({flock.Latitude.ToString(System.Globalization.CultureInfo.InvariantCulture)},{flock.Longitude.ToString(System.Globalization.CultureInfo.InvariantCulture)},8)");
+                }
+                catch { }
+            }
+        }
+
+        /// <summary>Opens ground-eye view from the 📷 button in each flock row.</summary>
+        private void BtnGroundEyeFlock_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is System.Windows.Controls.Button btn && btn.DataContext is GroundFlock flock)
+            {
+                OpenGroundEyeWindow(flock.Latitude, flock.Longitude, flock.Name);
+            }
+        }
+
+
+
+        /// <summary>Opens a ground-eye view camera using Google Street View / Mapillary embed in a new WebView2 window.</summary>
+        private void BtnGroundEyeView_Click(object sender, RoutedEventArgs e)
+        {
+            // Get selected flock location or use default AOR center
+            double lat = 30.0, lon = 44.0;
+            string locationName = "Middle East AOR";
+
+            if (dgFlocks.SelectedItem is GroundFlock flock)
+            {
+                lat = flock.Latitude;
+                lon = flock.Longitude;
+                locationName = flock.Name;
+            }
+            else if (dgConflictZones.SelectedItem is GroundConflictZone zone)
+            {
+                lat = zone.Latitude;
+                lon = zone.Longitude;
+                locationName = zone.Name;
+            }
+            else if (dgCheckpoints.SelectedItem is GroundCheckpoint cp)
+            {
+                lat = cp.Latitude;
+                lon = cp.Longitude;
+                locationName = cp.Name;
+            }
+
+            OpenGroundEyeWindow(lat, lon, locationName);
+        }
+
+        /// <summary>Loads embedded ground-eye preview in the bottom panel WebView2.</summary>
+        private void LoadEmbeddedGroundEye(double lat, double lon, string name)
+        {
+            try
+            {
+                txtGroundEyeLabel.Visibility = Visibility.Collapsed;
+                webGroundEye.Visibility = Visibility.Visible;
+                var latStr = lat.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                var lonStr = lon.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                var html = """
+<!DOCTYPE html><html><head><meta charset='utf-8'/>
+<style>*{margin:0;padding:0}body{background:#080810;overflow:hidden}
+#map{width:100%;height:100%}.leaflet-control-attribution{display:none!important}</style>
+<link rel='stylesheet' href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'/>
+<script src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'></script></head>
+<body><div id='map' style='width:100%;height:100vh'></div><script>
+var m=L.map('map',{zoomControl:false}).setView([__LAT__,__LON__],16);
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19}).addTo(m);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd',opacity:0.7}).addTo(m);
+var ti=L.divIcon({className:'t',html:'<div style="width:30px;height:30px;border:2px solid #33CC3388;border-radius:50%;position:relative"><div style="position:absolute;top:50%;left:-6px;right:-6px;height:1px;background:#33CC3366"></div><div style="position:absolute;left:50%;top:-6px;bottom:-6px;width:1px;background:#33CC3366"></div><div style="position:absolute;top:50%;left:50%;width:4px;height:4px;background:#33CC33;border-radius:50%;transform:translate(-50%,-50%)"></div></div>',iconSize:[30,30],iconAnchor:[15,15]});
+L.marker([__LAT__,__LON__],{icon:ti}).addTo(m);
+</script></body></html>
+""".Replace("__LAT__", latStr).Replace("__LON__", lonStr);
+                _ = InitGroundEyePreviewAsync(html);
+            }
+            catch { }
+        }
+
+        private async Task InitGroundEyePreviewAsync(string html)
+        {
+            try
+            {
+                await webGroundEye.EnsureCoreWebView2Async();
+                webGroundEye.CoreWebView2.NavigateToString(html);
+            }
+            catch { }
+        }
+
+        /// <summary>Opens a standalone Ground Eye View window.</summary>
+        private void OpenGroundEyeWindow(double lat, double lon, string locationName)
+        {
+            var streetViewHtml = BuildStreetViewHtml(lat, lon, locationName);
+
+            var window = new Window
+            {
+                Title = $"N01D :: GROUND EYE — {locationName}",
+                Width = 1100,
+                Height = 700,
+                WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                Background = new SolidColorBrush(Color.FromRgb(0x08, 0x08, 0x10))
+            };
+
+            var grid = new Grid();
+            grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+            grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+
+            // Header bar
+            var header = new Border
+            {
+                Background = new SolidColorBrush(Color.FromRgb(0x16, 0x16, 0x25)),
+                Padding = new Thickness(12, 8, 12, 8)
+            };
+            var headerPanel = new StackPanel { Orientation = Orientation.Horizontal };
+            headerPanel.Children.Add(new TextBlock
+            {
+                Text = $"👁 GROUND EYE VIEW — {locationName}",
+                FontFamily = new FontFamily("Consolas"),
+                FontSize = 14,
+                FontWeight = FontWeights.Bold,
+                Foreground = new SolidColorBrush(Color.FromRgb(0x33, 0xCC, 0x33)),
+                VerticalAlignment = VerticalAlignment.Center
+            });
+            headerPanel.Children.Add(new TextBlock
+            {
+                Text = $"  |  {lat:F4}, {lon:F4}",
+                FontFamily = new FontFamily("Consolas"),
+                FontSize = 12,
+                Foreground = new SolidColorBrush(Color.FromRgb(0x6A, 0x6A, 0x80)),
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(10, 0, 0, 0)
+            });
+            header.Child = headerPanel;
+            Grid.SetRow(header, 0);
+            grid.Children.Add(header);
+
+            // WebView2 for street view
+            var wv = new Microsoft.Web.WebView2.Wpf.WebView2
+            {
+                DefaultBackgroundColor = System.Drawing.Color.FromArgb(255, 8, 8, 16)
+            };
+            Grid.SetRow(wv, 1);
+            grid.Children.Add(wv);
+
+            window.Content = grid;
+            window.Show();
+
+            // Initialize WebView2 and navigate
+            _ = InitStreetViewAsync(wv, streetViewHtml);
+        }
+
+        private async Task InitStreetViewAsync(Microsoft.Web.WebView2.Wpf.WebView2 wv, string html)
+        {
+            try
+            {
+                await wv.EnsureCoreWebView2Async();
+                wv.CoreWebView2.NavigateToString(html);
+            }
+            catch { }
+        }
+
+        private static string BuildStreetViewHtml(double lat, double lon, string locationName)
+        {
+            var latStr = lat.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            var lonStr = lon.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            var escapedName = Escape(locationName);
+
+            return """
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'/>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #080810; font-family: Consolas, monospace; color: #D0D0D0; overflow: hidden; }
+        .toolbar {
+            background: #10101C; border-bottom: 1px solid #2A2A3E; padding: 8px 14px;
+            display: flex; align-items: center; gap: 12px; font-size: 11px;
+        }
+        .toolbar button {
+            background: #161625; color: #3388FF; border: 1px solid #2A2A3E;
+            padding: 4px 12px; border-radius: 3px; cursor: pointer;
+            font-family: Consolas; font-size: 11px;
+        }
+        .toolbar button:hover { background: #1E1E35; border-color: #3388FF; }
+        .toolbar button.active { border-color: #33CC33; color: #33CC33; }
+        .toolbar .coords { color: #6A6A80; }
+        .toolbar .label { color: #33CCCC; font-weight: bold; }
+        #viewer { width: 100vw; height: calc(100vh - 38px); }
+        .source-panel {
+            position: absolute; bottom: 12px; right: 12px; z-index: 1000;
+            background: #080810ee; border: 1px solid #2A2A3E; border-radius: 4px;
+            padding: 10px 14px; font-size: 10px; backdrop-filter: blur(8px);
+        }
+        .source-panel h4 { color: #AA55FF; margin-bottom: 6px; font-size: 11px; }
+        .source-panel a {
+            display: block; color: #3388FF; text-decoration: none; padding: 2px 0;
+        }
+        .source-panel a:hover { color: #33CCCC; }
+        .compass {
+            position: absolute; top: 60px; right: 12px; z-index: 1000;
+            width: 60px; height: 60px; border-radius: 50%;
+            background: #080810ee; border: 1px solid #2A2A3E;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px;
+        }
+        #heading-display { color: #33CC33; font-size: 10px; text-align: center; }
+        .nv-overlay {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none; z-index: 500; display: none;
+            background: radial-gradient(ellipse at center, transparent 40%, rgba(0,20,0,0.5) 100%);
+            mix-blend-mode: multiply;
+        }
+        .nv-scanline {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none; z-index: 501; display: none;
+            background: repeating-linear-gradient(
+                0deg, transparent, transparent 2px, rgba(0,60,0,0.08) 2px, rgba(0,60,0,0.08) 4px
+            );
+        }
+    </style>
+    <link rel='stylesheet' href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'/>
+    <script src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'></script>
+</head>
+<body>
+    <div class='toolbar'>
+        <span class='label'>&#x1F441; GROUND EYE</span>
+        <button id='btnSat' class='active' onclick="switchView('sat')">&#x1F6F0; SATELLITE</button>
+        <button id='btnStreet' onclick="switchView('street')">&#x1F4F7; STREET VIEW</button>
+        <button id='btnWebcam' onclick="switchView('webcam')">&#x1F4F9; WEBCAMS</button>
+        <button id='btnNV' onclick='toggleNV()'>&#x1F319; NIGHT VISION</button>
+        <span class='coords' id='coordsDisplay'>__LAT__, __LON__</span>
+    </div>
+    <div class='nv-overlay' id='nvOverlay'></div>
+    <div class='nv-scanline' id='nvScanline'></div>
+    <div id='viewer'></div>
+
+    <div class='compass' id='compass'>&#x1F9ED;</div>
+
+    <div class='source-panel'>
+        <h4>&#x1F4E1; SOURCES</h4>
+        <a href='https://www.google.com/maps/@__LAT__,__LON__,18z' target='_blank'>&#x1F5FA; Google Maps</a>
+        <a href='https://www.google.com/maps/@?api=1&amp;map_action=pano&amp;viewpoint=__LAT__,__LON__' target='_blank'>&#x1F4F7; Google Street View</a>
+        <a href='https://www.mapillary.com/app/?lat=__LAT__&amp;lng=__LON__&amp;z=16' target='_blank'>&#x1F4F8; Mapillary</a>
+        <a href='https://www.openstreetmap.org/#map=16/__LAT__/__LON__' target='_blank'>&#x1F30D; OpenStreetMap</a>
+        <a href='https://zoom.earth/#view=__LAT__,__LON__,16z' target='_blank'>&#x1F6F0; Zoom Earth</a>
+        <a href='https://livingatlas.arcgis.com/wayback/#active=54110&amp;mapCenter=__LON__%2C__LAT__%2C16' target='_blank'>&#x1F570; Esri Wayback</a>
+    </div>
+
+    <script>
+        var currentLat = __LAT__;
+        var currentLon = __LON__;
+        var nvActive = false;
+        var currentView = 'sat';
+        var map = null;
+
+        function initSatView() {
+            document.getElementById('viewer').innerHTML = '';
+            map = L.map('viewer', {
+                zoomControl: true, minZoom: 3, maxZoom: 19
+            }).setView([currentLat, currentLon], 16);
+
+            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Esri World Imagery | N01D Ground Eye',
+                maxZoom: 19
+            }).addTo(map);
+
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png', {
+                maxZoom: 19, subdomains: 'abcd', opacity: 0.7
+            }).addTo(map);
+
+            var targetIcon = L.divIcon({
+                className: 'target-marker',
+                html: '<div style="width:40px;height:40px;border:2px solid #33CC3388;border-radius:50%;position:relative">' +
+                      '<div style="position:absolute;top:50%;left:-8px;right:-8px;height:1px;background:#33CC3366"></div>' +
+                      '<div style="position:absolute;left:50%;top:-8px;bottom:-8px;width:1px;background:#33CC3366"></div>' +
+                      '<div style="position:absolute;top:50%;left:50%;width:6px;height:6px;background:#33CC33;border-radius:50%;transform:translate(-50%,-50%)"></div></div>',
+                iconSize: [40, 40], iconAnchor: [20, 20]
+            });
+            L.marker([currentLat, currentLon], { icon: targetIcon }).addTo(map)
+              .bindPopup('<div style="font-family:Consolas;font-size:11px;color:#D0D0D0;padding:4px">' +
+                '<b style="color:#33CC33">&#x1F441; __LOCNAME__</b><br>' +
+                'Lat: __LAT__<br>Lon: __LON__</div>');
+
+            map.on('mousemove', function(e) {
+                document.getElementById('coordsDisplay').textContent = e.latlng.lat.toFixed(5) + ', ' + e.latlng.lng.toFixed(5);
+            });
+
+            var measureStart = null;
+            var measureLine = null;
+            map.on('contextmenu', function(e) {
+                if (!measureStart) {
+                    measureStart = e.latlng;
+                    L.popup().setLatLng(e.latlng)
+                        .setContent('<div style="font-family:Consolas;font-size:10px;color:#33CC33;padding:2px">&#x1F4CF; Click another point to measure distance</div>')
+                        .openOn(map);
+                } else {
+                    var dist = measureStart.distanceTo(e.latlng);
+                    var distKm = (dist / 1000).toFixed(2);
+                    var distMi = (dist / 1609.34).toFixed(2);
+                    if (measureLine) map.removeLayer(measureLine);
+                    measureLine = L.polyline([measureStart, e.latlng], { color: '#FF8833', weight: 2, dashArray: '6,4' }).addTo(map);
+                    L.popup().setLatLng(e.latlng)
+                        .setContent('<div style="font-family:Consolas;font-size:10px;color:#FF8833;padding:2px">&#x1F4CF; ' + distKm + ' km / ' + distMi + ' mi</div>')
+                        .openOn(map);
+                    measureStart = null;
+                }
+            });
+        }
+
+        function switchView(view) {
+            currentView = view;
+            document.querySelectorAll('.toolbar button').forEach(function(b) { b.classList.remove('active'); });
+
+            if (view === 'sat') {
+                document.getElementById('btnSat').classList.add('active');
+                initSatView();
+            } else if (view === 'street') {
+                document.getElementById('btnStreet').classList.add('active');
+                document.getElementById('viewer').innerHTML =
+                    '<iframe src="https://www.google.com/maps/embed?pb=!4v0!6m8!1m7!1s0!2m2!1d' + currentLat + '!2d' + currentLon +
+                    '!3f0!4f0!5f0.7820865974627469" style="width:100%;height:100%;border:0" allowfullscreen loading="lazy"></iframe>' +
+                    '<div style="position:absolute;top:50px;left:50%;transform:translateX(-50%);background:#080810ee;border:1px solid #33CC33;' +
+                    'border-radius:4px;padding:8px 16px;font-family:Consolas;font-size:11px;color:#33CC33;z-index:1000">' +
+                    '&#x1F4F7; Street View &#x2014; If unavailable, try the source links panel &#x2192;</div>';
+            } else if (view === 'webcam') {
+                document.getElementById('btnWebcam').classList.add('active');
+                document.getElementById('viewer').innerHTML =
+                    '<iframe src="https://www.windy.com/webcams/map/__LAT__,__LON__,12" ' +
+                    'style="width:100%;height:100%;border:0" allowfullscreen></iframe>' +
+                    '<div style="position:absolute;top:50px;left:50%;transform:translateX(-50%);background:#080810ee;border:1px solid #AA55FF;' +
+                    'border-radius:4px;padding:8px 16px;font-family:Consolas;font-size:11px;color:#AA55FF;z-index:1000">' +
+                    '&#x1F4F9; Nearby Webcams &#x2014; Powered by Windy.com</div>';
+            }
+        }
+
+        function toggleNV() {
+            nvActive = !nvActive;
+            document.getElementById('nvOverlay').style.display = nvActive ? 'block' : 'none';
+            document.getElementById('nvScanline').style.display = nvActive ? 'block' : 'none';
+            document.getElementById('btnNV').classList.toggle('active', nvActive);
+            if (nvActive && map) {
+                document.getElementById('viewer').style.filter = 'saturate(0) brightness(0.8) sepia(1) hue-rotate(70deg) saturate(3) brightness(1.2)';
+            } else {
+                document.getElementById('viewer').style.filter = 'none';
+            }
+        }
+
+        initSatView();
+    </script>
+</body>
+</html>
+"""
+                .Replace("__LAT__", latStr)
+                .Replace("__LON__", lonStr)
+                .Replace("__LOCNAME__", escapedName);
         }
     }
 

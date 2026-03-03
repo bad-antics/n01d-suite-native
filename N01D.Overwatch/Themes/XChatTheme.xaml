@@ -221,4 +221,103 @@
         <Setter Property="FontSize" Value="11"/>
     </Style>
 
+    <!-- ─── IRC Topic Bar (used for tab headers/stats) ─── -->
+    <Style x:Key="XChatTopicBar" TargetType="Border">
+        <Setter Property="Background">
+            <Setter.Value>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                    <GradientStop Color="#161625" Offset="0"/>
+                    <GradientStop Color="#10101C" Offset="1"/>
+                </LinearGradientBrush>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="BorderBrush" Value="{StaticResource XChatBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="0,0,0,1"/>
+        <Setter Property="Padding" Value="12,6"/>
+    </Style>
+
+    <!-- ─── IRC Channel Separator ─── -->
+    <Style x:Key="XChatSeparator" TargetType="Separator">
+        <Setter Property="Background" Value="{StaticResource XChatBorderBrush}"/>
+        <Setter Property="Height" Value="1"/>
+        <Setter Property="Margin" Value="0,4"/>
+    </Style>
+
+    <!-- ─── IRC Nick Label (colored text labels like user nicks) ─── -->
+    <Style x:Key="XChatNickLabel" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource XChatMonoFont}"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Foreground" Value="{StaticResource XChatCyanBrush}"/>
+    </Style>
+
+    <!-- ─── IRC Timestamp Label ─── -->
+    <Style x:Key="XChatTimestamp" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource XChatMonoFont}"/>
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="Foreground" Value="{StaticResource XChatTextDimBrush}"/>
+    </Style>
+
+    <!-- ─── Status indicator (● LIVE / ○ OFFLINE) ─── -->
+    <Style x:Key="XChatLiveIndicator" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource XChatMonoFont}"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Foreground" Value="{StaticResource XChatGreenBrush}"/>
+    </Style>
+
+    <!-- ─── ListBoxItem with hover highlight ─── -->
+    <Style TargetType="ListBoxItem">
+        <Setter Property="Foreground" Value="{StaticResource XChatTextBrush}"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Padding" Value="2"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListBoxItem">
+                    <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="#1A1A30"/>
+                            <Setter Property="Foreground" Value="{StaticResource XChatBlueBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="#12121F"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ─── DataGridRow hover ─── -->
+    <Style TargetType="DataGridRow">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{StaticResource XChatTextBrush}"/>
+        <Style.Triggers>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="#1A1A30"/>
+                <Setter Property="Foreground" Value="{StaticResource XChatBlueBrush}"/>
+            </Trigger>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="#12121F"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- ─── DataGridCell focus override ─── -->
+    <Style TargetType="DataGridCell">
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="4,2"/>
+        <Setter Property="Foreground" Value="{StaticResource XChatTextBrush}"/>
+        <Style.Triggers>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Foreground" Value="{StaticResource XChatBlueBrush}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
 </ResourceDictionary>

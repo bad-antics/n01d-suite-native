@@ -302,4 +302,163 @@ namespace N01D.Overwatch.Models
         public string Notes { get; set; } = "";
         public List<MilitaryEquipment> Equipment { get; set; } = new();
     }
+
+    // ══════════════════════════════════════════
+    //  GROUND FLOCK TRACKING MODELS
+    // ══════════════════════════════════════════
+
+    public enum GroundFlockType
+    {
+        ForceCluster,
+        MilitiaCluster,
+        BorderGuard,
+        FrontLine,
+        ForwardBase,
+        LogisticsHub,
+        AdvisoryMission,
+        Convoy,
+        ProtestCluster,
+        IDPCamp
+    }
+
+    public enum ConflictIntensity
+    {
+        LowIntensity,
+        MediumIntensity,
+        HighIntensity
+    }
+
+    public enum CheckpointType
+    {
+        FOB,
+        AirBase,
+        BorderCrossing,
+        MilitaryCheckpoint,
+        HumanitarianCorridor
+    }
+
+    public class GroundFlock
+    {
+        public string Id { get; set; } = "";
+        public string Name { get; set; } = "";
+        public string Country { get; set; } = "";
+        public string Force { get; set; } = "";
+        public string ForceFlag { get; set; } = "";
+        public GroundFlockType FlockType { get; set; }
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+        public double RadiusKm { get; set; }
+        public string EstimatedStrength { get; set; } = "";
+        public string Equipment { get; set; } = "";
+        public SeverityLevel ThreatLevel { get; set; }
+        public string Description { get; set; } = "";
+        public DateTime LastUpdated { get; set; }
+        public bool IsActive { get; set; } = true;
+
+        // Display helpers
+        public string ThreatDisplay => ThreatLevel switch
+        {
+            SeverityLevel.Critical => "🔴 CRITICAL",
+            SeverityLevel.High => "🟠 HIGH",
+            SeverityLevel.Medium => "🟡 MEDIUM",
+            _ => "🟢 LOW"
+        };
+
+        public string TypeDisplay => FlockType switch
+        {
+            GroundFlockType.ForceCluster => "🪖 Force Cluster",
+            GroundFlockType.MilitiaCluster => "⚔ Militia",
+            GroundFlockType.BorderGuard => "🛡 Border Guard",
+            GroundFlockType.FrontLine => "🎯 Front Line",
+            GroundFlockType.ForwardBase => "🏴 Forward Base",
+            GroundFlockType.LogisticsHub => "📦 Logistics Hub",
+            GroundFlockType.AdvisoryMission => "🎖 Advisory",
+            GroundFlockType.Convoy => "🚛 Convoy",
+            GroundFlockType.ProtestCluster => "📢 Protest",
+            GroundFlockType.IDPCamp => "🏕 IDP Camp",
+            _ => "👥 Unknown"
+        };
+
+        public string AgeDisplay
+        {
+            get
+            {
+                var diff = DateTime.UtcNow - LastUpdated;
+                if (diff.TotalHours < 1) return "< 1h ago";
+                if (diff.TotalHours < 24) return $"{(int)diff.TotalHours}h ago";
+                return $"{(int)diff.TotalDays}d ago";
+            }
+        }
+    }
+
+    public class GroundConflictZone
+    {
+        public string Id { get; set; } = "";
+        public string Name { get; set; } = "";
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+        public double RadiusKm { get; set; }
+        public ConflictIntensity Intensity { get; set; }
+        public string Description { get; set; } = "";
+        public string Belligerents { get; set; } = "";
+        public DateTime LastUpdated { get; set; }
+
+        public string IntensityDisplay => Intensity switch
+        {
+            ConflictIntensity.HighIntensity => "🔴 HIGH",
+            ConflictIntensity.MediumIntensity => "🟠 MEDIUM",
+            _ => "🟡 LOW"
+        };
+    }
+
+    public class ThermalHotspot
+    {
+        public string Id { get; set; } = "";
+        public string Name { get; set; } = "";
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+        public int Confidence { get; set; }
+        public double BrightnessK { get; set; }
+        public string Source { get; set; } = "";
+        public string SatelliteName { get; set; } = "";
+        public string Description { get; set; } = "";
+        public DateTime DetectedUtc { get; set; }
+
+        public string ConfidenceDisplay => Confidence >= 80 ? "🔴 HIGH" :
+                                           (Confidence >= 60 ? "🟠 MEDIUM" : "🟡 LOW");
+    }
+
+    public class GroundCheckpoint
+    {
+        public string Id { get; set; } = "";
+        public string Name { get; set; } = "";
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+        public string Controller { get; set; } = "";
+        public CheckpointType Type { get; set; }
+        public string Description { get; set; } = "";
+
+        public string TypeDisplay => Type switch
+        {
+            CheckpointType.FOB => "🏴 FOB",
+            CheckpointType.AirBase => "🛫 Air Base",
+            CheckpointType.BorderCrossing => "🚧 Border Crossing",
+            CheckpointType.MilitaryCheckpoint => "🛑 Checkpoint",
+            CheckpointType.HumanitarianCorridor => "🏥 Humanitarian",
+            _ => "📍 Other"
+        };
+    }
+
+    public class DisplacementCorridor
+    {
+        public string Id { get; set; } = "";
+        public string Name { get; set; } = "";
+        public double StartLat { get; set; }
+        public double StartLon { get; set; }
+        public double EndLat { get; set; }
+        public double EndLon { get; set; }
+        public int EstimatedPersons { get; set; }
+        public string Status { get; set; } = "";
+        public string Description { get; set; } = "";
+    }
 }

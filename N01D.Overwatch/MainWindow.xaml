@@ -764,6 +764,350 @@
                     </DataGrid>
                 </Grid>
             </TabItem>
+
+            <!-- GROUND FLOCK TRACKING TAB -->
+            <TabItem Header="🪖 GROUND" Style="{StaticResource XChatTabItem}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Ground Header -->
+                    <Border Grid.Row="0" Background="{StaticResource XChatSurfaceBrush}" Padding="10,6">
+                        <DockPanel>
+                            <TextBlock Text="GROUND FLOCK TRACKING — FORCE DEPLOYMENTS &amp; CONFLICT ZONES" FontFamily="Consolas"
+                                       FontSize="12" Foreground="{StaticResource XChatOrangeBrush}" FontWeight="Bold" VerticalAlignment="Center"/>
+                            <Button Content="📷 GROUND EYE" Style="{StaticResource XChatButton}"
+                                    Click="BtnGroundEyeView_Click" FontSize="11" HorizontalAlignment="Right"
+                                    DockPanel.Dock="Right" Margin="6,0,0,0" ToolTip="Open street-level view for selected location"/>
+                            <Button Content="🗺 SHOW ON MAP" Style="{StaticResource XChatButton}"
+                                    Click="BtnShowGroundOnMap_Click" FontSize="11" HorizontalAlignment="Right"
+                                    DockPanel.Dock="Right" Margin="6,0,0,0"/>
+                            <ComboBox x:Name="cmbGroundFilter" Width="140" FontFamily="Consolas" FontSize="11"
+                                      Background="{StaticResource XChatInputBgBrush}" Foreground="{StaticResource XChatTextBrush}"
+                                      BorderBrush="{StaticResource XChatBorderBrush}"
+                                      SelectionChanged="CmbGroundFilter_Changed" HorizontalAlignment="Right" DockPanel.Dock="Right">
+                                <ComboBoxItem Content="ALL" IsSelected="True"/>
+                                <ComboBoxItem Content="ACTIVE ONLY"/>
+                                <ComboBoxItem Content="ForceCluster"/>
+                                <ComboBoxItem Content="MilitiaCluster"/>
+                                <ComboBoxItem Content="BorderGuard"/>
+                                <ComboBoxItem Content="FrontLine"/>
+                                <ComboBoxItem Content="ForwardBase"/>
+                                <ComboBoxItem Content="LogisticsHub"/>
+                                <ComboBoxItem Content="AdvisoryMission"/>
+                            </ComboBox>
+                        </DockPanel>
+                    </Border>
+
+                    <!-- Ground Stats -->
+                    <Border Grid.Row="1" Background="{StaticResource XChatBackgroundAltBrush}" Padding="12,6"
+                            BorderBrush="{StaticResource XChatBorderBrush}" BorderThickness="0,0,0,1">
+                        <TextBlock x:Name="txtGroundStats" FontFamily="Consolas" FontSize="11"
+                                   Foreground="{StaticResource XChatCyanBrush}" TextWrapping="Wrap"/>
+                    </Border>
+
+                    <!-- Ground Sub-Tabs -->
+                    <TabControl Grid.Row="2" Style="{StaticResource XChatTabControl}">
+                        <!-- FLOCKS Sub-Tab -->
+                        <TabItem Header="🪖 FLOCKS" Style="{StaticResource XChatTabItem}">
+                            <DataGrid x:Name="dgFlocks" AutoGenerateColumns="False"
+                                      Background="{StaticResource XChatBackgroundBrush}" Foreground="{StaticResource XChatTextBrush}"
+                                      FontFamily="Consolas" FontSize="11"
+                                      BorderThickness="0" GridLinesVisibility="Horizontal"
+                                      HorizontalGridLinesBrush="{StaticResource XChatSurfaceBrush}"
+                                      RowBackground="{StaticResource XChatBackgroundBrush}"
+                                      AlternatingRowBackground="{StaticResource XChatBackgroundAltBrush}"
+                                      IsReadOnly="True" HeadersVisibility="Column" CanUserSortColumns="True"
+                                      SelectionChanged="DgFlocks_SelectionChanged">
+                                <DataGrid.ColumnHeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="Background" Value="{StaticResource XChatSurfaceBrush}"/>
+                                        <Setter Property="Foreground" Value="{StaticResource XChatOrangeBrush}"/>
+                                        <Setter Property="FontFamily" Value="Consolas"/>
+                                        <Setter Property="FontSize" Value="11"/>
+                                        <Setter Property="FontWeight" Value="Bold"/>
+                                        <Setter Property="Padding" Value="8,6"/>
+                                        <Setter Property="BorderBrush" Value="{StaticResource XChatBorderBrush}"/>
+                                        <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                                    </Style>
+                                </DataGrid.ColumnHeaderStyle>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="FLAG" Binding="{Binding ForceFlag}" Width="40"/>
+                                    <DataGridTextColumn Header="NAME" Binding="{Binding Name}" Width="250"/>
+                                    <DataGridTextColumn Header="FORCE" Binding="{Binding Force}" Width="180"/>
+                                    <DataGridTextColumn Header="TYPE" Binding="{Binding TypeDisplay}" Width="140"/>
+                                    <DataGridTextColumn Header="STRENGTH" Binding="{Binding EstimatedStrength}" Width="120"/>
+                                    <DataGridTextColumn Header="THREAT" Binding="{Binding ThreatDisplay}" Width="100"/>
+                                    <DataGridTextColumn Header="UPDATED" Binding="{Binding AgeDisplay}" Width="80"/>
+                                    <DataGridTextColumn Header="LAT" Binding="{Binding Latitude, StringFormat=F3}" Width="70"/>
+                                    <DataGridTextColumn Header="LON" Binding="{Binding Longitude, StringFormat=F3}" Width="70"/>
+                                    <DataGridTemplateColumn Header="👁" Width="60">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Button Content="📷" Style="{StaticResource XChatButton}" FontSize="12"
+                                                        Padding="6,2" Click="BtnGroundEyeFlock_Click"
+                                                        ToolTip="Ground Eye View"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </TabItem>
+
+                        <!-- CONFLICT ZONES Sub-Tab -->
+                        <TabItem Header="🎯 CONFLICTS" Style="{StaticResource XChatTabItem}">
+                            <DataGrid x:Name="dgConflictZones" AutoGenerateColumns="False"
+                                      Background="{StaticResource XChatBackgroundBrush}" Foreground="{StaticResource XChatTextBrush}"
+                                      FontFamily="Consolas" FontSize="11"
+                                      BorderThickness="0" GridLinesVisibility="Horizontal"
+                                      HorizontalGridLinesBrush="{StaticResource XChatSurfaceBrush}"
+                                      RowBackground="{StaticResource XChatBackgroundBrush}"
+                                      AlternatingRowBackground="{StaticResource XChatBackgroundAltBrush}"
+                                      IsReadOnly="True" HeadersVisibility="Column">
+                                <DataGrid.ColumnHeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="Background" Value="{StaticResource XChatSurfaceBrush}"/>
+                                        <Setter Property="Foreground" Value="{StaticResource XChatRedBrush}"/>
+                                        <Setter Property="FontFamily" Value="Consolas"/>
+                                        <Setter Property="FontSize" Value="11"/>
+                                        <Setter Property="FontWeight" Value="Bold"/>
+                                        <Setter Property="Padding" Value="8,6"/>
+                                        <Setter Property="BorderBrush" Value="{StaticResource XChatBorderBrush}"/>
+                                        <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                                    </Style>
+                                </DataGrid.ColumnHeaderStyle>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="ZONE" Binding="{Binding Name}" Width="250"/>
+                                    <DataGridTextColumn Header="INTENSITY" Binding="{Binding IntensityDisplay}" Width="140"/>
+                                    <DataGridTextColumn Header="BELLIGERENTS" Binding="{Binding Belligerents}" Width="250"/>
+                                    <DataGridTextColumn Header="RADIUS (km)" Binding="{Binding RadiusKm}" Width="90"/>
+                                    <DataGridTextColumn Header="DESCRIPTION" Binding="{Binding Description}" Width="500"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </TabItem>
+
+                        <!-- THERMAL Sub-Tab -->
+                        <TabItem Header="🔥 THERMAL" Style="{StaticResource XChatTabItem}">
+                            <DataGrid x:Name="dgThermal" AutoGenerateColumns="False"
+                                      Background="{StaticResource XChatBackgroundBrush}" Foreground="{StaticResource XChatTextBrush}"
+                                      FontFamily="Consolas" FontSize="11"
+                                      BorderThickness="0" GridLinesVisibility="Horizontal"
+                                      HorizontalGridLinesBrush="{StaticResource XChatSurfaceBrush}"
+                                      RowBackground="{StaticResource XChatBackgroundBrush}"
+                                      AlternatingRowBackground="{StaticResource XChatBackgroundAltBrush}"
+                                      IsReadOnly="True" HeadersVisibility="Column">
+                                <DataGrid.ColumnHeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="Background" Value="{StaticResource XChatSurfaceBrush}"/>
+                                        <Setter Property="Foreground" Value="{StaticResource XChatYellowBrush}"/>
+                                        <Setter Property="FontFamily" Value="Consolas"/>
+                                        <Setter Property="FontSize" Value="11"/>
+                                        <Setter Property="FontWeight" Value="Bold"/>
+                                        <Setter Property="Padding" Value="8,6"/>
+                                        <Setter Property="BorderBrush" Value="{StaticResource XChatBorderBrush}"/>
+                                        <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                                    </Style>
+                                </DataGrid.ColumnHeaderStyle>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="HOTSPOT" Binding="{Binding Name}" Width="250"/>
+                                    <DataGridTextColumn Header="CONFIDENCE" Binding="{Binding ConfidenceDisplay}" Width="120"/>
+                                    <DataGridTextColumn Header="BRIGHTNESS" Binding="{Binding BrightnessK, StringFormat=F0}" Width="100"/>
+                                    <DataGridTextColumn Header="SOURCE" Binding="{Binding Source}" Width="120"/>
+                                    <DataGridTextColumn Header="SATELLITE" Binding="{Binding SatelliteName}" Width="100"/>
+                                    <DataGridTextColumn Header="DETECTED" Binding="{Binding DetectedUtc, StringFormat=yyyy-MM-dd HH:mm}" Width="140"/>
+                                    <DataGridTextColumn Header="DESCRIPTION" Binding="{Binding Description}" Width="400"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </TabItem>
+
+                        <!-- CHECKPOINTS Sub-Tab -->
+                        <TabItem Header="🏴 CHECKPOINTS" Style="{StaticResource XChatTabItem}">
+                            <DataGrid x:Name="dgCheckpoints" AutoGenerateColumns="False"
+                                      Background="{StaticResource XChatBackgroundBrush}" Foreground="{StaticResource XChatTextBrush}"
+                                      FontFamily="Consolas" FontSize="11"
+                                      BorderThickness="0" GridLinesVisibility="Horizontal"
+                                      HorizontalGridLinesBrush="{StaticResource XChatSurfaceBrush}"
+                                      RowBackground="{StaticResource XChatBackgroundBrush}"
+                                      AlternatingRowBackground="{StaticResource XChatBackgroundAltBrush}"
+                                      IsReadOnly="True" HeadersVisibility="Column">
+                                <DataGrid.ColumnHeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="Background" Value="{StaticResource XChatSurfaceBrush}"/>
+                                        <Setter Property="Foreground" Value="{StaticResource XChatGreenBrush}"/>
+                                        <Setter Property="FontFamily" Value="Consolas"/>
+                                        <Setter Property="FontSize" Value="11"/>
+                                        <Setter Property="FontWeight" Value="Bold"/>
+                                        <Setter Property="Padding" Value="8,6"/>
+                                        <Setter Property="BorderBrush" Value="{StaticResource XChatBorderBrush}"/>
+                                        <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                                    </Style>
+                                </DataGrid.ColumnHeaderStyle>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="NAME" Binding="{Binding Name}" Width="250"/>
+                                    <DataGridTextColumn Header="TYPE" Binding="{Binding TypeDisplay}" Width="140"/>
+                                    <DataGridTextColumn Header="CONTROLLER" Binding="{Binding Controller}" Width="160"/>
+                                    <DataGridTextColumn Header="LAT" Binding="{Binding Latitude, StringFormat=F3}" Width="80"/>
+                                    <DataGridTextColumn Header="LON" Binding="{Binding Longitude, StringFormat=F3}" Width="80"/>
+                                    <DataGridTextColumn Header="DESCRIPTION" Binding="{Binding Description}" Width="500"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </TabItem>
+
+                        <!-- IDP CORRIDORS Sub-Tab -->
+                        <TabItem Header="🏕 IDP" Style="{StaticResource XChatTabItem}">
+                            <DataGrid x:Name="dgCorridors" AutoGenerateColumns="False"
+                                      Background="{StaticResource XChatBackgroundBrush}" Foreground="{StaticResource XChatTextBrush}"
+                                      FontFamily="Consolas" FontSize="11"
+                                      BorderThickness="0" GridLinesVisibility="Horizontal"
+                                      HorizontalGridLinesBrush="{StaticResource XChatSurfaceBrush}"
+                                      RowBackground="{StaticResource XChatBackgroundBrush}"
+                                      AlternatingRowBackground="{StaticResource XChatBackgroundAltBrush}"
+                                      IsReadOnly="True" HeadersVisibility="Column">
+                                <DataGrid.ColumnHeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="Background" Value="{StaticResource XChatSurfaceBrush}"/>
+                                        <Setter Property="Foreground" Value="{StaticResource XChatPurpleBrush}"/>
+                                        <Setter Property="FontFamily" Value="Consolas"/>
+                                        <Setter Property="FontSize" Value="11"/>
+                                        <Setter Property="FontWeight" Value="Bold"/>
+                                        <Setter Property="Padding" Value="8,6"/>
+                                        <Setter Property="BorderBrush" Value="{StaticResource XChatBorderBrush}"/>
+                                        <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                                    </Style>
+                                </DataGrid.ColumnHeaderStyle>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="CORRIDOR" Binding="{Binding Name}" Width="300"/>
+                                    <DataGridTextColumn Header="DISPLACED" Binding="{Binding EstimatedPersons, StringFormat=N0}" Width="140"/>
+                                    <DataGridTextColumn Header="STATUS" Binding="{Binding Status}" Width="140"/>
+                                    <DataGridTextColumn Header="DESCRIPTION" Binding="{Binding Description}" Width="500"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </TabItem>
+                    </TabControl>
+
+                    <!-- Ground Detail / Ground Eye View Panel -->
+                    <Border Grid.Row="3" Background="{StaticResource XChatSurfaceBrush}" Padding="12,8"
+                            BorderBrush="{StaticResource XChatBorderBrush}" BorderThickness="0,1,0,0" MaxHeight="200">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="400"/>
+                            </Grid.ColumnDefinitions>
+                            <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
+                                <TextBlock x:Name="txtGroundDetail" FontFamily="Consolas" FontSize="11"
+                                           Foreground="{StaticResource XChatTextBrush}" TextWrapping="Wrap"
+                                           Text="Select a ground flock, conflict zone, or checkpoint above. Click 📷 for ground-eye street-level view."/>
+                            </ScrollViewer>
+                            <Border Grid.Column="1" Background="{StaticResource XChatBackgroundBrush}"
+                                    BorderBrush="{StaticResource XChatBorderBrush}" BorderThickness="1,0,0,0">
+                                <Grid>
+                                    <TextBlock x:Name="txtGroundEyeLabel" FontFamily="Consolas" FontSize="10"
+                                               Foreground="{StaticResource XChatTextDimBrush}" 
+                                               VerticalAlignment="Center" HorizontalAlignment="Center"
+                                               TextAlignment="Center"
+                                               Text="📷 GROUND EYE VIEW&#x0a;Select a location and click 📷"/>
+                                    <wv2:WebView2 x:Name="webGroundEye" DefaultBackgroundColor="#080810"
+                                                  Visibility="Collapsed"/>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- WARZONE RADIO TAB -->
+            <TabItem Header="📻 RADIO" Style="{StaticResource XChatTabItem}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="160"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Radio Header -->
+                    <Border Grid.Row="0" Background="{StaticResource XChatSurfaceBrush}" Padding="10,6">
+                        <DockPanel>
+                            <TextBlock Text="WARZONE RADIO — LIVE PRESS &amp; FIELD STREAMS" FontFamily="Consolas"
+                                       FontSize="12" Foreground="{StaticResource XChatRedBrush}" FontWeight="Bold" VerticalAlignment="Center"/>
+                            <ComboBox x:Name="cmbRadioFilter" DockPanel.Dock="Right" Width="160" Margin="10,0,0,0"
+                                      Background="{StaticResource XChatInputBgBrush}" Foreground="{StaticResource XChatTextBrush}"
+                                      BorderBrush="{StaticResource XChatBorderBrush}" FontFamily="Consolas" FontSize="11"
+                                      SelectionChanged="CmbRadioFilter_Changed" SelectedIndex="0">
+                                <ComboBoxItem Content="ALL"/>
+                                <ComboBoxItem Content="LIVE ONLY"/>
+                                <ComboBoxItem Content="LiveNews"/>
+                                <ComboBoxItem Content="Regional"/>
+                                <ComboBoxItem Content="MilitaryBriefing"/>
+                                <ComboBoxItem Content="Scanner"/>
+                                <ComboBoxItem Content="Humanitarian"/>
+                            </ComboBox>
+                        </DockPanel>
+                    </Border>
+
+                    <!-- Radio Stats -->
+                    <Border Grid.Row="1" Background="{StaticResource XChatBackgroundAltBrush}" Padding="12,6"
+                            BorderBrush="{StaticResource XChatBorderBrush}" BorderThickness="0,0,0,1">
+                        <TextBlock x:Name="txtRadioStats" FontFamily="Consolas" FontSize="11"
+                                   Foreground="{StaticResource XChatCyanBrush}" TextWrapping="Wrap"/>
+                    </Border>
+
+                    <!-- Stream List -->
+                    <DataGrid x:Name="dgRadio" Grid.Row="2" AutoGenerateColumns="False"
+                              Background="{StaticResource XChatBackgroundBrush}" Foreground="{StaticResource XChatTextBrush}"
+                              FontFamily="Consolas" FontSize="11"
+                              BorderThickness="0" GridLinesVisibility="Horizontal"
+                              HorizontalGridLinesBrush="{StaticResource XChatSurfaceBrush}"
+                              RowBackground="{StaticResource XChatBackgroundBrush}"
+                              AlternatingRowBackground="{StaticResource XChatBackgroundAltBrush}"
+                              IsReadOnly="True" HeadersVisibility="Column" CanUserSortColumns="True"
+                              SelectionChanged="DgRadio_SelectionChanged">
+                        <DataGrid.ColumnHeaderStyle>
+                            <Style TargetType="DataGridColumnHeader">
+                                <Setter Property="Background" Value="{StaticResource XChatSurfaceBrush}"/>
+                                <Setter Property="Foreground" Value="{StaticResource XChatRedBrush}"/>
+                                <Setter Property="FontFamily" Value="Consolas"/>
+                                <Setter Property="FontSize" Value="11"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                                <Setter Property="Padding" Value="8,6"/>
+                                <Setter Property="BorderBrush" Value="{StaticResource XChatBorderBrush}"/>
+                                <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                            </Style>
+                        </DataGrid.ColumnHeaderStyle>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="STATUS" Binding="{Binding StatusDisplay}" Width="100"/>
+                            <DataGridTextColumn Header="NAME" Binding="{Binding Name}" Width="200"/>
+                            <DataGridTextColumn Header="CATEGORY" Binding="{Binding CategoryDisplay}" Width="140"/>
+                            <DataGridTextColumn Header="REGION" Binding="{Binding Region}" Width="160"/>
+                            <DataGridTextColumn Header="LANG" Binding="{Binding Language}" Width="100"/>
+                            <DataGridTextColumn Header="DESCRIPTION" Binding="{Binding Description}" Width="500"/>
+                            <DataGridTemplateColumn Header="ACTION" Width="80">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content="OPEN" Style="{StaticResource XChatButton}" FontSize="10"
+                                                Padding="8,2" Click="BtnOpenStream_Click"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <!-- Stream Detail -->
+                    <Border Grid.Row="3" Background="{StaticResource XChatSurfaceBrush}" Padding="12,8"
+                            BorderBrush="{StaticResource XChatBorderBrush}" BorderThickness="0,1,0,0">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <TextBlock x:Name="txtRadioDetail" FontFamily="Consolas" FontSize="11"
+                                       Foreground="{StaticResource XChatTextBrush}" TextWrapping="Wrap"
+                                       Text="Select a stream above to view details. Click OPEN to launch in your default browser or media player."/>
+                        </ScrollViewer>
+                    </Border>
+                </Grid>
+            </TabItem>
+
         </TabControl>
 
         <!-- Status Bar -->

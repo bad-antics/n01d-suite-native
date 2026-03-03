@@ -96,6 +96,52 @@ namespace N01D.Overwatch.Services
                 "Missile launches, tests, and ballistic missile defense events"),
             new WarOpsFeed("NK News", "https://www.nknews.org/feed/", WarOpsCategory.Proxy,
                 "North Korea proliferation — Iran-DPRK weapons cooperation"),
+
+            // ── DEEPER SIGACT / KINETIC (expanded coverage) ──
+            new WarOpsFeed("Oryx OSINT", "https://www.oryxspioenkop.com/feeds/posts/default?alt=rss", WarOpsCategory.SIGACT,
+                "Visual evidence tracking of destroyed military equipment"),
+            new WarOpsFeed("ISW - Inst. for Study of War", "https://www.understandingwar.org/rss.xml", WarOpsCategory.SIGACT,
+                "Institute for the Study of War — campaign assessments, front-line maps"),
+            new WarOpsFeed("CNA Military Expert", "https://www.cna.org/rss/all", WarOpsCategory.SIGACT,
+                "Center for Naval Analyses — maritime ops, fleet readiness assessments"),
+            new WarOpsFeed("Jerusalem Post", "https://www.jpost.com/rss/rssfeedsdefense.aspx", WarOpsCategory.SIGACT,
+                "Israel defense and security reporting — IDF operations, Iran front"),
+            new WarOpsFeed("Times of Israel", "https://www.timesofisrael.com/feed/", WarOpsCategory.SIGACT,
+                "Israeli news — military operations, security incidents, intelligence"),
+            new WarOpsFeed("Task & Purpose", "https://taskandpurpose.com/feed/", WarOpsCategory.SIGACT,
+                "US military operations, deployments, and force posture updates"),
+            new WarOpsFeed("Military Times", "https://www.militarytimes.com/arc/outboundfeeds/rss/?outputType=xml", WarOpsCategory.SIGACT,
+                "US military news — force movements, combat operations, casualties"),
+            new WarOpsFeed("Defense News", "https://www.defensenews.com/arc/outboundfeeds/rss/?outputType=xml", WarOpsCategory.SIGACT,
+                "Global defense industry — weapons deployments, military contracts"),
+
+            // ── DEEPER SANCTIONS / ARMS ──
+            new WarOpsFeed("Congressional Research", "https://crsreports.congress.gov/rss.xml", WarOpsCategory.Sanctions,
+                "US Congressional Research Service — arms sales, foreign military financing"),
+            new WarOpsFeed("Atlantic Council", "https://www.atlanticcouncil.org/feed/", WarOpsCategory.Sanctions,
+                "Geopolitics and defense policy — sanctions effectiveness, diplomacy"),
+
+            // ── DEEPER CYBER ──
+            new WarOpsFeed("CISA Alerts", "https://www.cisa.gov/cybersecurity-advisories/all.xml", WarOpsCategory.Cyber,
+                "US CISA — Iranian/Russian state-sponsored cyber activity alerts"),
+            new WarOpsFeed("Unit 42 (Palo Alto)", "https://unit42.paloaltonetworks.com/feed/", WarOpsCategory.Cyber,
+                "Unit 42 threat research — Iranian APT groups, wipers, ransomware"),
+            new WarOpsFeed("ESET Research", "https://www.welivesecurity.com/feed/", WarOpsCategory.Cyber,
+                "ESET threat intelligence — MuddyWater, OilRig, Middle East cyber ops"),
+
+            // ── DEEPER PROXY / REGIONAL ──
+            new WarOpsFeed("Carnegie ME Center", "https://carnegie-mec.org/feed/", WarOpsCategory.Proxy,
+                "Carnegie Middle East Center — analysis of proxy forces, sectarian dynamics"),
+            new WarOpsFeed("RAND Corp", "https://www.rand.org/content/rand/blog.rss.xml", WarOpsCategory.Proxy,
+                "RAND research — Iranian influence, proxy warfare, force assessment"),
+            new WarOpsFeed("FDD Long War", "https://www.fdd.org/feed/", WarOpsCategory.Proxy,
+                "Foundation for Defense of Democracies — Iran, Hezbollah, Houthi tracking"),
+            new WarOpsFeed("Haaretz Defense", "https://www.haaretz.com/cmlink/1.4503726", WarOpsCategory.Proxy,
+                "Israeli investigative — deep analysis of regional proxy conflicts"),
+            new WarOpsFeed("Daily Star Lebanon", "https://www.dailystar.com.lb/RSS.aspx", WarOpsCategory.Proxy,
+                "Beirut-based — Lebanese front, Hezbollah ops, south Lebanon activity"),
+            new WarOpsFeed("Sana News Syria", "https://sana.sy/en/?feed=rss2", WarOpsCategory.Proxy,
+                "Syrian state media — pro-regime perspective, SAA operations"),
         };
 
         // ══════════════════════════════════════════
