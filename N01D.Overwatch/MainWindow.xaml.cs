@@ -23,13 +23,20 @@ namespace N01D.Overwatch
         private readonly EclipseService _eclipse = new();
         private readonly MissileDefenseService _missiles = new();
         private readonly WarMonitoringService _warOps = new();
+        private readonly EquipmentDatabaseService _equipment = new();
 
         private readonly ObservableCollection<EventViewModel> _timelineItems = new();
         private readonly List<ConflictEvent> _allEvents = new();
         private DispatcherTimer? _autoRefreshTimer;
         private DispatcherTimer? _eclipseTimer;
+        private DispatcherTimer? _liveTrackingTimer;
         private bool _isLoading;
         private bool _initialized;
+        private bool _liveTrackingEnabled;
+        private int _liveTrackingCycles;
+        private DateTime _lastFlightScan = DateTime.MinValue;
+        private DateTime _lastWarOpsScan = DateTime.MinValue;
+        private List<FlightData> _lastFlights = new();
 
         public MainWindow()
         {
@@ -38,6 +45,7 @@ namespace N01D.Overwatch
             LoadAlertRules();
             LoadEclipseData();
             LoadMissileDefenseData();
+            LoadEquipmentData();
             _initialized = true;
             Loaded += async (_, _) => await RefreshAllAsync();
             InitMap();
@@ -52,7 +60,7 @@ namespace N01D.Overwatch
         {
             if (_isLoading) return;
             _isLoading = true;
-            txtStatus.Text = "⟳ Scanning feeds...";
+            txtStatus.Text = "⟳ Scanning all feeds...";
             btnRefresh.IsEnabled = false;
 
             try
@@ -66,6 +74,18 @@ namespace N01D.Overwatch
                 // Ships
                 var shipTask = _ships.FetchVesselsAsync();
                 tasks.Add(shipTask);
+
+                // Flights (now included in auto-refresh)
+                var flightTask = _flights.FetchMilitaryFlightsAsync();
+                tasks.Add(flightTask);
+
+                // War Ops (periodic — every 5 min max)
+                Task<List<ConflictEvent>>? warOpsTask = null;
+                if ((DateTime.UtcNow - _lastWarOpsScan).TotalMinutes >= 5 || _lastWarOpsScan == DateTime.MinValue)
+                {
+                    warOpsTask = _warOps.FetchAllAsync();
+                    tasks.Add(warOpsTask);
+                }
 
                 await Task.WhenAll(tasks);
 
@@ -83,8 +103,49 @@ namespace N01D.Overwatch
                 _allEvents.RemoveAll(e => e.DataSource == DataSource.ShipTracker);
                 foreach (var v in vessels)
                     _allEvents.Add(_ships.ToConflictEvent(v));
-
                 dgVessels.ItemsSource = vessels;
+
+                // Process flights
+                var flights = await flightTask;
+                _lastFlights = flights;
+                _lastFlightScan = DateTime.UtcNow;
+                dgFlights.ItemsSource = flights;
+                txtFlightCount.Text = $"{flights.Count} military aircraft detected";
+                _allEvents.RemoveAll(e2 => e2.DataSource == DataSource.FlightTracker);
+                foreach (var f in flights)
+                {
+                    var ev = _flights.ToConflictEvent(f);
+                    if (ev != null)
+                    {
+                        _alerts.EvaluateEvent(ev);
+                        _allEvents.Add(ev);
+                    }
+                }
+                UpdateMapFlights(flights);
+
+                // Process war ops
+                if (warOpsTask != null)
+                {
+                    var warEvents = await warOpsTask;
+                    _lastWarOpsScan = DateTime.UtcNow;
+                    foreach (var ev in warEvents)
+                    {
+                        _alerts.EvaluateEvent(ev);
+                        if (!_allEvents.Any(e2 => e2.Title == ev.Title && e2.Source == ev.Source))
+                            _allEvents.Add(ev);
+                    }
+
+                    // Update war ops sub-tabs
+                    var sigacts = warEvents.Where(e2 => e2.Tags.Contains("SIGACT")).Select(e2 => new EventViewModel(e2)).ToList();
+                    var sanctions = warEvents.Where(e2 => e2.Tags.Contains("SANCTIONS")).Select(e2 => new EventViewModel(e2)).ToList();
+                    var cyberOps = warEvents.Where(e2 => e2.Tags.Contains("CYBER")).Select(e2 => new EventViewModel(e2)).ToList();
+                    var proxy = warEvents.Where(e2 => e2.Tags.Contains("PROXY")).Select(e2 => new EventViewModel(e2)).ToList();
+                    lstSigact.ItemsSource = sigacts;
+                    lstSanctions.ItemsSource = sanctions;
+                    lstCyberOps.ItemsSource = cyberOps;
+                    lstProxy.ItemsSource = proxy;
+                    txtWarOpsCount.Text = $"{warEvents.Count} war actions detected";
+                }
 
                 ApplyFilters();
                 UpdateAlertCount();
@@ -92,7 +153,8 @@ namespace N01D.Overwatch
                 UpdateMap();
 
                 txtLastUpdate.Text = $"Last update: {DateTime.Now:HH:mm:ss}";
-                txtStatus.Text = $"✓ {_allEvents.Count} events tracked";
+                var liveLabel = _liveTrackingEnabled ? " [LIVE]" : "";
+                txtStatus.Text = $"✓ {_allEvents.Count} events | {flights.Count} flights | {vessels.Count} ships{liveLabel}";
             }
             catch (Exception ex)
             {
@@ -540,6 +602,11 @@ namespace N01D.Overwatch
                         0% { r: 6; opacity: 1; }
                         100% { r: 20; opacity: 0; }
                     }
+                    @keyframes pulse {
+                        0% { opacity: 1; }
+                        50% { opacity: 0.3; }
+                        100% { opacity: 1; }
+                    }
 
                     /* Custom Leaflet overrides */
                     .leaflet-popup-content-wrapper { background: #161625 !important; border: 1px solid #2A2A3E; border-radius: 4px !important; padding: 0 !important; box-shadow: 0 4px 20px rgba(0,0,0,0.6) !important; }
@@ -566,8 +633,15 @@ namespace N01D.Overwatch
                     <label class="layer-toggle"><input type="checkbox" id="togPipelines" checked onchange="toggleLayer('pipelines')"> 🛢 Oil Routes</label>
                     <label class="layer-toggle"><input type="checkbox" id="togMissiles" checked onchange="toggleLayer('missiles')"> 🚀 Missile Sites</label>
                     <label class="layer-toggle"><input type="checkbox" id="togDefense" checked onchange="toggleLayer('defense')"> 🛡 Air Defense</label>
+                    <label class="layer-toggle"><input type="checkbox" id="togEquipment" onchange="toggleLayer('equipment')"> ⚙ Equipment</label>
                     <label class="layer-toggle"><input type="checkbox" id="togEclipse" onchange="toggleLayer('eclipse')"> 🌑 Eclipse Paths</label>
                     <label class="layer-toggle"><input type="checkbox" id="togHeatmap" onchange="toggleLayer('heatmap')"> 🔥 Event Density</label>
+                </div>
+
+                <!-- Live Status -->
+                <div id="liveIndicator" style="position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:1000;display:none;
+                     background:#080810ee;border:1px solid #33CC33;border-radius:4px;padding:6px 16px;font-family:Consolas;font-size:12px;color:#33CC33">
+                    <span style="animation:pulse 1s infinite">●</span> LIVE — <span id="liveFlightCount">0</span> aircraft — Scan #<span id="liveCycleCount">0</span>
                 </div>
 
                 <!-- Stats -->
@@ -575,6 +649,7 @@ namespace N01D.Overwatch
                     <h4>📊 MAP INTEL</h4>
                     <div class="stat-row"><span>Events plotted:</span><span class="stat-val" id="statEvents">0</span></div>
                     <div class="stat-row"><span>Aircraft tracked:</span><span class="stat-val" id="statFlights">0</span></div>
+                    <div class="stat-row"><span>Equipment assets:</span><span class="stat-val" id="statEquipment" style="color:#FF8833">0</span></div>
                     <div class="stat-row"><span>Critical zones:</span><span class="stat-val" id="statZones" style="color:#EE3333">5</span></div>
                     <div class="stat-row"><span>Missile sites:</span><span class="stat-val" id="statMissiles" style="color:#FF8833">0</span></div>
                     <div class="stat-row"><span>Defense systems:</span><span class="stat-val" id="statDefense" style="color:#33CCCC">0</span></div>
@@ -591,6 +666,7 @@ namespace N01D.Overwatch
                     <h4 style="margin-top:10px">MARKERS</h4>
                     <div class="legend-item"><span class="legend-dot" style="background:#AA55FF"></span> Nuclear Site</div>
                     <div class="legend-item"><span class="legend-dot" style="background:#33CC33"></span> Military Base</div>
+                    <div class="legend-item"><span class="legend-dot" style="background:#FF8833"></span> ⚙ Equipment</div>
                     <div class="legend-item"><span class="legend-line" style="border-color:#DDCC33"></span> Oil Route</div>
                     <div class="legend-item"><span class="legend-line" style="border-color:#EE3333"></span> Chokepoint</div>
                     <div class="legend-item"><span class="legend-dot" style="background:#FF5555"></span> 🚀 Missile Site</div>
@@ -630,6 +706,7 @@ namespace N01D.Overwatch
                     var defenseLayer = L.layerGroup().addTo(map);
                     var eclipseLayer = L.layerGroup();
                     var heatmapLayer = L.layerGroup();
+                    var equipmentLayer = L.layerGroup();
 
                     var layers = {
                         events: eventLayer,
@@ -640,7 +717,8 @@ namespace N01D.Overwatch
                         missiles: missileLayer,
                         defense: defenseLayer,
                         eclipse: eclipseLayer,
-                        heatmap: heatmapLayer
+                        heatmap: heatmapLayer,
+                        equipment: equipmentLayer
                     };
 
                     function toggleLayer(name) {
@@ -1084,6 +1162,63 @@ namespace N01D.Overwatch
                     }
 
                     // ═══════════════════════════════════════
+                    //  EQUIPMENT DEPLOYMENTS (called from C#)
+                    // ═══════════════════════════════════════
+
+                    function updateEquipment(data) {
+                        equipmentLayer.clearLayers();
+                        var count = 0;
+
+                        data.forEach(function(eq) {
+                            count++;
+                            var eqIcon = L.divIcon({
+                                className: 'equipment-marker',
+                                html: '<div style="font-size:14px;text-shadow:0 0 6px ' + eq.color + '80" title="' + eq.name + '">' + eq.icon + '</div>',
+                                iconSize: [16, 16], iconAnchor: [8, 8]
+                            });
+                            var marker = L.marker([eq.lat, eq.lon], { icon: eqIcon });
+
+                            var popupHtml = '<div class="event-popup">' +
+                                '<div class="popup-header" style="background:' + eq.color + '22;color:' + eq.color + ';border-bottom:1px solid ' + eq.color + '44">' +
+                                eq.icon + ' ' + eq.name + '</div>' +
+                                '<div class="popup-body">' +
+                                '<div style="margin-bottom:6px">' +
+                                '<span class="sev-badge" style="background:' + eq.color + '44;color:' + eq.color + ';border:1px solid ' + eq.color + '66">' + eq.designation + '</span>' +
+                                ' <span style="color:#6A6A80;font-size:10px">' + eq.domain + '</span>' +
+                                '</div>' +
+                                '<div style="font-size:11px">' + eq.desc + '</div>' +
+                                '<div style="margin-top:6px;font-size:10px;color:#33CCCC">Qty: ' + eq.qty + ' total / ' + eq.active + ' active</div>' +
+                                '<div style="font-size:10px;color:#FF8833">Specs: ' + eq.specs + '</div>' +
+                                '<div class="meta">' + eq.country + ' — ' + eq.operator + '</div>' +
+                                '<div class="meta">Base: ' + eq.base + '</div>' +
+                                '</div></div>';
+
+                            marker.bindPopup(popupHtml, { maxWidth: 450, className: 'dark-popup' });
+                            equipmentLayer.addLayer(marker);
+                        });
+
+                        document.getElementById('statEquipment').textContent = count;
+                    }
+
+                    // ═══════════════════════════════════════
+                    //  LIVE STATUS INDICATOR (called from C#)
+                    // ═══════════════════════════════════════
+
+                    function updateLiveStatus(isLive, flightCount, cycleCount) {
+                        var el = document.getElementById('liveIndicator');
+                        if (isLive) {
+                            el.style.display = 'block';
+                            document.getElementById('liveFlightCount').textContent = flightCount;
+                            document.getElementById('liveCycleCount').textContent = cycleCount;
+                            // Flash border
+                            el.style.borderColor = '#33CC33';
+                            setTimeout(function() { el.style.borderColor = '#33CC3366'; }, 500);
+                        } else {
+                            el.style.display = 'none';
+                        }
+                    }
+
+                    // ═══════════════════════════════════════
                     //  FLY-TO (called from C# on event select)
                     // ═══════════════════════════════════════
 
@@ -1295,6 +1430,147 @@ namespace N01D.Overwatch
         }
 
         private async void BtnRefresh_Click(object sender, RoutedEventArgs e) => await RefreshAllAsync();
+
+        // ═══════════════════════════════════════════
+        //  LIVE TRACKING (30-second flight polling)
+        // ═══════════════════════════════════════════
+
+        private void BtnToggleLiveTracking_Click(object sender, RoutedEventArgs e)
+        {
+            _liveTrackingEnabled = !_liveTrackingEnabled;
+
+            if (_liveTrackingEnabled)
+            {
+                _liveTrackingTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(30) };
+                _liveTrackingTimer.Tick += async (_, _) => await LiveTrackingPollAsync();
+                _liveTrackingTimer.Start();
+                txtLiveStatus.Text = "● LIVE";
+                txtLiveStatus.Foreground = new SolidColorBrush(Color.FromRgb(0x33, 0xCC, 0x33));
+                btnLiveTracking.Content = "⏹ STOP LIVE";
+                txtStatus.Text = "🔴 LIVE tracking enabled — polling flights every 30s";
+                _ = LiveTrackingPollAsync(); // Immediate first poll
+            }
+            else
+            {
+                _liveTrackingTimer?.Stop();
+                _liveTrackingTimer = null;
+                _liveTrackingCycles = 0;
+                txtLiveStatus.Text = "○ OFFLINE";
+                txtLiveStatus.Foreground = new SolidColorBrush(Color.FromRgb(0x6A, 0x6A, 0x80));
+                btnLiveTracking.Content = "▶ GO LIVE";
+                txtStatus.Text = "Live tracking stopped";
+            }
+        }
+
+        private async Task LiveTrackingPollAsync()
+        {
+            try
+            {
+                _liveTrackingCycles++;
+                var flights = await _flights.FetchMilitaryFlightsAsync();
+                _lastFlights = flights;
+                _lastFlightScan = DateTime.UtcNow;
+
+                Dispatcher.Invoke(() =>
+                {
+                    dgFlights.ItemsSource = flights;
+                    txtFlightCount.Text = $"{flights.Count} aircraft | Scan #{_liveTrackingCycles}";
+                    UpdateMapFlights(flights);
+
+                    // Update flight events in timeline
+                    _allEvents.RemoveAll(e2 => e2.DataSource == DataSource.FlightTracker);
+                    foreach (var f in flights)
+                    {
+                        var ev = _flights.ToConflictEvent(f);
+                        if (ev != null)
+                        {
+                            _alerts.EvaluateEvent(ev);
+                            _allEvents.Add(ev);
+                        }
+                    }
+
+                    var elapsed = DateTime.UtcNow - _lastFlightScan;
+                    txtLiveStatus.Text = $"● LIVE ({_liveTrackingCycles})";
+                    txtLastUpdate.Text = $"Flight scan: {DateTime.Now:HH:mm:ss}";
+                    webMap.CoreWebView2?.ExecuteScriptAsync($"updateLiveStatus(true,{flights.Count},{_liveTrackingCycles})");
+                });
+            }
+            catch (Exception ex)
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    txtLiveStatus.Text = "⚠ LIVE ERROR";
+                    txtLiveStatus.Foreground = new SolidColorBrush(Color.FromRgb(0xEE, 0x33, 0x33));
+                    txtStatus.Text = $"⚠ Live tracking error: {ex.Message}";
+                });
+            }
+        }
+
+        // ═══════════════════════════════════════════
+        //  EQUIPMENT DATABASE
+        // ═══════════════════════════════════════════
+
+        private void LoadEquipmentData()
+        {
+            var forces = _equipment.GetAllForces();
+            lstForceOrbat.ItemsSource = forces.Select(f => new ForceViewModel(f)).ToList();
+            dgEquipment.ItemsSource = _equipment.GetAllEquipment();
+
+            var stats = _equipment.GetStats();
+            txtEquipmentStats.Text = $"{stats.Countries} forces | {stats.TotalTypes} weapon systems | {stats.TotalActive:N0} active units | " +
+                                     $"✈ {stats.Aircraft:N0} aircraft | 🛩 {stats.Drones:N0} drones | 🚢 {stats.Naval:N0} naval | 🚀 {stats.Missiles:N0} missiles";
+        }
+
+        private void BtnShowEquipmentOnMap_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                UpdateMapEquipment();
+                tabMain.SelectedIndex = 1; // Switch to Map
+                webMap.CoreWebView2?.ExecuteScriptAsync("flyTo(30, 47, 5)");
+                txtStatus.Text = $"⚙ Equipment deployments displayed on map ({_equipment.GetTotalActiveCount():N0} active assets)";
+            }
+            catch { }
+        }
+
+        private void UpdateMapEquipment()
+        {
+            try
+            {
+                var data = _equipment.BuildEquipmentMapData();
+                webMap.CoreWebView2?.ExecuteScriptAsync($"updateEquipment([{data}])");
+            }
+            catch { }
+        }
+
+        private void CmbEquipmentFilter_Changed(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_initialized) return;
+            if (cmbEquipmentFilter.SelectedItem is ComboBoxItem item)
+            {
+                var filter = item.Content?.ToString() ?? "ALL";
+                List<MilitaryEquipment> filtered;
+
+                if (filter == "ALL")
+                    filtered = _equipment.GetAllEquipment();
+                else if (filter == "CRITICAL")
+                    filtered = _equipment.GetCriticalAssets();
+                else if (Enum.TryParse<EquipmentDomain>(filter.Replace(" ", ""), true, out var domain))
+                    filtered = _equipment.GetEquipmentByDomain(domain);
+                else
+                    filtered = _equipment.GetAllEquipment();
+
+                dgEquipment.ItemsSource = filtered;
+            }
+        }
+
+        private void LstForceOrbat_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (lstForceOrbat.SelectedItem is ForceViewModel vm)
+            {
+                dgEquipment.ItemsSource = _equipment.GetEquipmentByCountry(vm.Country);
+            }
+        }
     }
 
     // ═══════════════════════════════════════════
@@ -1420,5 +1696,51 @@ namespace N01D.Overwatch
         }
 
         public string MagnitudeDisplay => $"Mag: {Eclipse.MaxMagnitude:F3}";
+    }
+
+    public class ForceViewModel
+    {
+        public ForceComposition Force { get; }
+
+        public ForceViewModel(ForceComposition f) => Force = f;
+
+        public string Country => Force.Country;
+        public string FlagEmoji => Force.FlagEmoji;
+        public string DisplayName => $"{Force.FlagEmoji} {Force.Country}";
+        public string PersonnelDisplay => $"{Force.ActivePersonnel:N0} active | {Force.ReservePersonnel:N0} reserve";
+        public string BudgetDisplay => $"${Force.DefenseBudgetBillions:F1}B";
+
+        public string EquipmentSummary
+        {
+            get
+            {
+                var aircraft = Force.Equipment.Where(e => e.Domain == EquipmentDomain.AirForce).Sum(e => e.QuantityActive);
+                var drones = Force.Equipment.Where(e => e.Domain == EquipmentDomain.Drones).Sum(e => e.QuantityActive);
+                var naval = Force.Equipment.Where(e => e.Domain == EquipmentDomain.Navy).Sum(e => e.QuantityActive);
+                var ground = Force.Equipment.Where(e => e.Domain == EquipmentDomain.GroundForces).Sum(e => e.QuantityActive);
+                var parts = new List<string>();
+                if (aircraft > 0) parts.Add($"✈ {aircraft}");
+                if (drones > 0) parts.Add($"🛩 {drones}");
+                if (naval > 0) parts.Add($"🚢 {naval}");
+                if (ground > 0) parts.Add($"🪖 {ground}");
+                return string.Join(" │ ", parts);
+            }
+        }
+
+        public string Notes => Force.Notes;
+        public int EquipmentCount => Force.Equipment.Count;
+
+        public string RankDisplay => Force.GlobalFirepowerRank > 0
+            ? $"GFP #{Force.GlobalFirepowerRank}"
+            : "N/A";
+
+        public string RankColor => Force.GlobalFirepowerRank switch
+        {
+            <= 0 => "#6A6A80",
+            <= 5 => "#EE3333",
+            <= 15 => "#FF8833",
+            <= 30 => "#DDCC33",
+            _ => "#33CC33"
+        };
     }
 }

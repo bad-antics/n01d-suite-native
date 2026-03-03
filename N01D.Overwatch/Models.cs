@@ -193,4 +193,113 @@ namespace N01D.Overwatch.Models
         public AirDefenseType DefenseType { get; set; }
         public SeverityLevel ThreatLevel { get; set; }
     }
+
+    // ══════════════════════════════════════════
+    //  EQUIPMENT / ORDER OF BATTLE MODELS
+    // ══════════════════════════════════════════
+
+    public enum EquipmentDomain
+    {
+        AirForce,
+        Navy,
+        GroundForces,
+        AirDefense,
+        SpecialForces,
+        Drones,
+        Missiles,
+        CyberElectronicWarfare
+    }
+
+    public enum EquipmentStatus
+    {
+        Operational,
+        PartiallyOperational,
+        InMaintenance,
+        Reserve,
+        Retired,
+        Unknown
+    }
+
+    public enum EquipmentRole
+    {
+        AirSuperiority,
+        MultiRole,
+        GroundAttack,
+        Bomber,
+        ISR,
+        AWACS,
+        Tanker,
+        Transport,
+        CSAR,
+        EW,
+        MaritimePatrol,
+        AttackHelicopter,
+        UtilityHelicopter,
+        UCAV,
+        Submarine,
+        Destroyer,
+        Frigate,
+        Corvette,
+        FastAttackCraft,
+        AmphibiousAssault,
+        Carrier,
+        MBT,
+        IFV,
+        APC,
+        SelfPropelledArtillery,
+        MLRS,
+        SpecOps,
+        AntiShipMissile,
+        BallisticMissile,
+        CruiseMissile,
+        LoiteringMunition,
+        TacticalISR,
+        MALE,
+        HALE,
+        SAM,
+        SHORAD,
+        CIWS,
+        Minesweeper,
+        OilTanker,
+        SupplyShip,
+        PatrolBoat
+    }
+
+    public class MilitaryEquipment
+    {
+        public string Id { get; set; } = "";
+        public string Name { get; set; } = "";
+        public string Designation { get; set; } = "";      // NATO/common designation
+        public string Country { get; set; } = "";
+        public string Operator { get; set; } = "";          // Military branch
+        public EquipmentDomain Domain { get; set; }
+        public EquipmentRole Role { get; set; }
+        public EquipmentStatus Status { get; set; } = EquipmentStatus.Operational;
+        public int Quantity { get; set; }
+        public int QuantityActive { get; set; }
+        public string Manufacturer { get; set; } = "";
+        public string Origin { get; set; } = "";            // Country of origin
+        public int YearIntroduced { get; set; }
+        public string Specs { get; set; } = "";             // Key specifications
+        public string Description { get; set; } = "";
+        public double? BaseLat { get; set; }                // Primary deployment location
+        public double? BaseLon { get; set; }
+        public string BaseLocation { get; set; } = "";
+        public SeverityLevel ThreatRating { get; set; }
+        public string ImageIcon { get; set; } = "";         // Emoji icon
+    }
+
+    public class ForceComposition
+    {
+        public string Country { get; set; } = "";
+        public string FlagEmoji { get; set; } = "";
+        public int TotalPersonnel { get; set; }
+        public int ActivePersonnel { get; set; }
+        public int ReservePersonnel { get; set; }
+        public int ParamilitaryPersonnel { get; set; }
+        public double DefenseBudgetBillions { get; set; }
+        public int GlobalFirepowerRank { get; set; }
+        public string Notes { get; set; } = "";
+        public List<MilitaryEquipment> Equipment { get; set; } = new();
+    }
 }

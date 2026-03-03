@@ -36,9 +36,15 @@
                     <TextBlock x:Name="txtAlertCount" FontFamily="Consolas" FontSize="13"
                                Foreground="{StaticResource XChatRedBrush}" VerticalAlignment="Center"
                                Text="⚠ 0 ALERTS"/>
+                    <TextBlock Text=" │ " FontFamily="Consolas" FontSize="12" Foreground="{StaticResource XChatBorderBrush}" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="txtLiveStatus" FontFamily="Consolas" FontSize="12"
+                               Foreground="{StaticResource XChatTextDimBrush}" VerticalAlignment="Center"
+                               Text="○ OFFLINE"/>
                 </StackPanel>
 
                 <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <Button x:Name="btnLiveTracking" Content="▶ GO LIVE" Style="{StaticResource XChatButton}"
+                            Click="BtnToggleLiveTracking_Click" FontSize="11" Margin="4,0"/>
                     <Button x:Name="btnRefresh" Content="⟳ REFRESH" Style="{StaticResource XChatButton}"
                             Click="BtnRefresh_Click" FontSize="11" Margin="4,0"/>
                     <Button x:Name="btnExportJson" Content="📥 JSON" Style="{StaticResource XChatButton}"
@@ -633,6 +639,129 @@
                             </DataGrid>
                         </TabItem>
                     </TabControl>
+                </Grid>
+            </TabItem>
+
+            <!-- EQUIPMENT / ORDER OF BATTLE TAB -->
+            <TabItem Header="⚙ EQUIPMENT" Style="{StaticResource XChatTabItem}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="200"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Equipment Header -->
+                    <Border Grid.Row="0" Background="{StaticResource XChatSurfaceBrush}" Padding="10,6">
+                        <DockPanel>
+                            <TextBlock Text="ORDER OF BATTLE — ACTIVE MILITARY EQUIPMENT TRACKER" FontFamily="Consolas"
+                                       FontSize="12" Foreground="{StaticResource XChatOrangeBrush}" FontWeight="Bold" VerticalAlignment="Center"/>
+                            <Button Content="🗺 SHOW ON MAP" Style="{StaticResource XChatButton}"
+                                    Click="BtnShowEquipmentOnMap_Click" FontSize="11" HorizontalAlignment="Right"
+                                    DockPanel.Dock="Right" Margin="6,0,0,0"/>
+                            <ComboBox x:Name="cmbEquipmentFilter" Width="120" FontFamily="Consolas" FontSize="11"
+                                      Background="{StaticResource XChatInputBgBrush}" Foreground="{StaticResource XChatTextBrush}" 
+                                      BorderBrush="{StaticResource XChatBorderBrush}"
+                                      SelectionChanged="CmbEquipmentFilter_Changed" HorizontalAlignment="Right" DockPanel.Dock="Right">
+                                <ComboBoxItem Content="ALL" IsSelected="True"/>
+                                <ComboBoxItem Content="CRITICAL"/>
+                                <ComboBoxItem Content="AirForce"/>
+                                <ComboBoxItem Content="Navy"/>
+                                <ComboBoxItem Content="GroundForces"/>
+                                <ComboBoxItem Content="Drones"/>
+                                <ComboBoxItem Content="Missiles"/>
+                                <ComboBoxItem Content="AirDefense"/>
+                            </ComboBox>
+                        </DockPanel>
+                    </Border>
+
+                    <!-- Equipment Stats Banner -->
+                    <Border Grid.Row="1" Background="{StaticResource XChatBackgroundAltBrush}" Padding="12,6" 
+                            BorderBrush="{StaticResource XChatBorderBrush}" BorderThickness="0,0,0,1">
+                        <TextBlock x:Name="txtEquipmentStats" FontFamily="Consolas" FontSize="11"
+                                   Foreground="{StaticResource XChatCyanBrush}" TextWrapping="Wrap"/>
+                    </Border>
+
+                    <!-- Force Composition List (top) -->
+                    <ListBox x:Name="lstForceOrbat" Grid.Row="2" Style="{StaticResource XChatListBox}"
+                             Background="{StaticResource XChatBackgroundBrush}"
+                             SelectionChanged="LstForceOrbat_SelectionChanged">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border Padding="10,6" Margin="2" CornerRadius="3"
+                                        Background="{StaticResource XChatSurfaceBrush}" BorderBrush="{StaticResource XChatBorderBrush}" BorderThickness="1">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="{Binding FlagEmoji}" FontSize="24" 
+                                                   VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Country}" FontFamily="Consolas" FontSize="13"
+                                                       Foreground="{StaticResource XChatBlueBrush}" FontWeight="Bold"/>
+                                            <TextBlock Text="{Binding PersonnelDisplay}" FontFamily="Consolas" FontSize="10"
+                                                       Foreground="{StaticResource XChatTextDimBrush}" Margin="0,2,0,0"/>
+                                            <TextBlock Text="{Binding EquipmentSummary}" FontFamily="Consolas" FontSize="10"
+                                                       Foreground="{StaticResource XChatCyanBrush}" Margin="0,2,0,0"/>
+                                            <TextBlock Text="{Binding Notes}" FontFamily="Consolas" FontSize="9"
+                                                       Foreground="{StaticResource XChatTextDimBrush}" TextWrapping="Wrap"
+                                                       MaxHeight="22" Margin="0,2,0,0"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                            <TextBlock Text="{Binding BudgetDisplay}" FontFamily="Consolas" FontSize="11"
+                                                       Foreground="{StaticResource XChatGreenBrush}" HorizontalAlignment="Right"/>
+                                            <TextBlock Text="{Binding RankDisplay}" FontFamily="Consolas" FontSize="10"
+                                                       Foreground="{Binding RankColor}" HorizontalAlignment="Right" Margin="0,2,0,0"/>
+                                            <TextBlock FontFamily="Consolas" FontSize="10" Foreground="{StaticResource XChatTextDimBrush}" 
+                                                       HorizontalAlignment="Right" Margin="0,2,0,0">
+                                                <Run Text="{Binding EquipmentCount, Mode=OneWay}"/>
+                                                <Run Text=" systems"/>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <!-- Equipment DataGrid (bottom) -->
+                    <DataGrid x:Name="dgEquipment" Grid.Row="3" AutoGenerateColumns="False"
+                              Background="{StaticResource XChatBackgroundBrush}" Foreground="{StaticResource XChatTextBrush}" 
+                              FontFamily="Consolas" FontSize="11"
+                              BorderThickness="0" GridLinesVisibility="Horizontal"
+                              HorizontalGridLinesBrush="{StaticResource XChatSurfaceBrush}" 
+                              RowBackground="{StaticResource XChatBackgroundBrush}"
+                              AlternatingRowBackground="{StaticResource XChatBackgroundAltBrush}" 
+                              IsReadOnly="True" HeadersVisibility="Column" CanUserSortColumns="True">
+                        <DataGrid.ColumnHeaderStyle>
+                            <Style TargetType="DataGridColumnHeader">
+                                <Setter Property="Background" Value="{StaticResource XChatSurfaceBrush}"/>
+                                <Setter Property="Foreground" Value="{StaticResource XChatOrangeBrush}"/>
+                                <Setter Property="FontFamily" Value="Consolas"/>
+                                <Setter Property="FontSize" Value="11"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                                <Setter Property="Padding" Value="8,6"/>
+                                <Setter Property="BorderBrush" Value="{StaticResource XChatBorderBrush}"/>
+                                <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                            </Style>
+                        </DataGrid.ColumnHeaderStyle>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ICON" Binding="{Binding ImageIcon}" Width="40"/>
+                            <DataGridTextColumn Header="NAME" Binding="{Binding Name}" Width="200"/>
+                            <DataGridTextColumn Header="DESIGNATION" Binding="{Binding Designation}" Width="120"/>
+                            <DataGridTextColumn Header="COUNTRY" Binding="{Binding Country}" Width="120"/>
+                            <DataGridTextColumn Header="DOMAIN" Binding="{Binding Domain}" Width="90"/>
+                            <DataGridTextColumn Header="ROLE" Binding="{Binding Role}" Width="120"/>
+                            <DataGridTextColumn Header="QTY" Binding="{Binding Quantity}" Width="50"/>
+                            <DataGridTextColumn Header="ACTIVE" Binding="{Binding QuantityActive}" Width="60"/>
+                            <DataGridTextColumn Header="ORIGIN" Binding="{Binding Origin}" Width="100"/>
+                            <DataGridTextColumn Header="THREAT" Binding="{Binding ThreatRating}" Width="70"/>
+                            <DataGridTextColumn Header="SPECS" Binding="{Binding Specs}" Width="400"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
                 </Grid>
             </TabItem>
         </TabControl>
