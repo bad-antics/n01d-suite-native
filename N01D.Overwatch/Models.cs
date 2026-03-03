@@ -461,4 +461,31 @@ namespace N01D.Overwatch.Models
         public string Status { get; set; } = "";
         public string Description { get; set; } = "";
     }
+
+    // ══════════════════════════════════════════
+    //  EQUIPMENT INTEL FEED
+    // ══════════════════════════════════════════
+
+    public class EquipmentIntelItem
+    {
+        public string Title { get; set; } = "";
+        public string Source { get; set; } = "";
+        public string Url { get; set; } = "";
+        public string Summary { get; set; } = "";
+        public DateTime Timestamp { get; set; }
+        public bool IsNew { get; set; }
+
+        public string TimeAgo
+        {
+            get
+            {
+                var diff = DateTime.UtcNow - Timestamp;
+                if (diff.TotalMinutes < 60) return $"{(int)diff.TotalMinutes}m ago";
+                if (diff.TotalHours < 24) return $"{(int)diff.TotalHours}h ago";
+                return $"{(int)diff.TotalDays}d ago";
+            }
+        }
+
+        public string NewDisplay => IsNew ? "🆕 NEW" : "";
+    }
 }

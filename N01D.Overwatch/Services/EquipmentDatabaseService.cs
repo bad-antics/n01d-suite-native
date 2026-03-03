@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.Xml.Linq;
 using N01D.Overwatch.Models;
 
 namespace N01D.Overwatch.Services
@@ -554,6 +557,94 @@ namespace N01D.Overwatch.Services
                 }
             },
         };
+
+        // ══════════════════════════════════════════════════════
+        //  LIVE EQUIPMENT INTELLIGENCE FEEDS
+        // ══════════════════════════════════════════════════════
+
+        private static readonly HttpClient _http = new() { Timeout = TimeSpan.FromSeconds(20) };
+        private readonly List<EquipmentIntelItem> _intelFeed = new();
+        private DateTime _lastIntelScan = DateTime.MinValue;
+
+        private static readonly List<(string Name, string Url)> _defenseFeeds = new()
+        {
+            ("Defense News", "https://www.defensenews.com/arc/outboundfeeds/rss/category/air/?outputType=xml"),
+            ("Janes", "https://www.janes.com/feeds/news"),
+            ("The War Zone", "https://www.thedrive.com/the-war-zone/feed"),
+            ("Defense One", "https://www.defenseone.com/rss/"),
+            ("Breaking Defense", "https://breakingdefense.com/feed/"),
+            ("Military Times", "https://www.militarytimes.com/arc/outboundfeeds/rss/?outputType=xml"),
+            ("Naval News", "https://www.navalnews.com/feed/"),
+            ("Air Force Magazine", "https://www.airandspaceforces.com/feed/"),
+            ("Army Recognition", "https://www.armyrecognition.com/rss"),
+            ("SIPRI News", "https://www.sipri.org/news/rss.xml"),
+            ("Defense Blog", "https://defence-blog.com/feed/"),
+            ("Global Defense Corp", "https://www.globaldefensecorp.com/feed/"),
+        };
+
+        /// <summary>
+        /// Scans defense news RSS feeds for equipment-related articles.
+        /// Tracks new procurement, deliveries, deployments, and capability upgrades.
+        /// </summary>
+        public async Task<List<EquipmentIntelItem>> FetchEquipmentIntelAsync()
+        {
+            var results = new List<EquipmentIntelItem>();
+            var keywords = new[] {
+                "delivery", "delivered", "procurement", "contract", "order", "purchase",
+                "f-35", "f-16", "su-35", "patriot", "thaad", "iron dome", "s-400", "s-300",
+                "drone", "uav", "ucav", "shahed", "bayraktar", "switchblade",
+                "tank", "abrams", "leopard", "merkava", "t-90",
+                "missile", "hypersonic", "ballistic", "cruise",
+                "corvette", "frigate", "submarine", "destroyer", "carrier",
+                "air defense", "radar", "satellite", "munition",
+                "iran", "israel", "saudi", "turkey", "egypt", "uae", "qatar",
+                "irgc", "iriaf", "idf", "usaf", "centcom"
+            };
+
+            foreach (var (name, url) in _defenseFeeds)
+            {
+                try
+                {
+                    var xml = await _http.GetStringAsync(url);
+                    var doc = XDocument.Parse(xml);
+                    var items = doc.Descendants("item").Take(15);
+
+                    foreach (var item in items)
+                    {
+                        var title = item.Element("title")?.Value ?? "";
+                        var desc = item.Element("description")?.Value ?? "";
+                        var link = item.Element("link")?.Value ?? "";
+                        var pubDate = item.Element("pubDate")?.Value ?? "";
+                        var combined = (title + " " + desc).ToLowerInvariant();
+
+                        // Only include articles matching defense equipment keywords
+                        if (keywords.Any(k => combined.Contains(k)))
+                        {
+                            DateTime.TryParse(pubDate, out var dt);
+                            if (dt == default) dt = DateTime.UtcNow;
+
+                            results.Add(new EquipmentIntelItem
+                            {
+                                Title = title.Length > 120 ? title[..120] + "..." : title,
+                                Source = name,
+                                Url = link,
+                                Summary = desc.Length > 300 ? desc[..300] + "..." : desc,
+                                Timestamp = dt,
+                                IsNew = dt > _lastIntelScan
+                            });
+                        }
+                    }
+                }
+                catch { /* Feed unavailable — continue to next */ }
+            }
+
+            _lastIntelScan = DateTime.UtcNow;
+            _intelFeed.Clear();
+            _intelFeed.AddRange(results.OrderByDescending(r => r.Timestamp).Take(100));
+            return _intelFeed.ToList();
+        }
+
+        public List<EquipmentIntelItem> GetLatestIntel() => _intelFeed.ToList();
 
         // ══════════════════════════════════════════════════════
         //  PUBLIC ACCESSORS

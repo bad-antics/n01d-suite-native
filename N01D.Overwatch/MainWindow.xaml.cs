@@ -26,6 +26,7 @@ namespace N01D.Overwatch
         private readonly EquipmentDatabaseService _equipment = new();
         private readonly RadioStreamService _radio = new();
         private readonly GroundTrackingService _ground = new();
+        private readonly MarketImpactService _market = new();
 
         private readonly ObservableCollection<EventViewModel> _timelineItems = new();
         private readonly List<ConflictEvent> _allEvents = new();
@@ -38,6 +39,7 @@ namespace N01D.Overwatch
         private int _liveTrackingCycles;
         private DateTime _lastFlightScan = DateTime.MinValue;
         private DateTime _lastWarOpsScan = DateTime.MinValue;
+        private DateTime _lastGroundScan = DateTime.MinValue;
         private List<FlightData> _lastFlights = new();
 
         public MainWindow()
@@ -50,6 +52,7 @@ namespace N01D.Overwatch
             LoadEquipmentData();
             LoadRadioStreams();
             LoadGroundData();
+            LoadMarketData();
             _initialized = true;
             Loaded += async (_, _) => await RefreshAllAsync();
             InitMap();
@@ -90,6 +93,18 @@ namespace N01D.Overwatch
                     warOpsTask = _warOps.FetchAllAsync();
                     tasks.Add(warOpsTask);
                 }
+
+                // Ground thermal hotspots — NASA FIRMS satellite data (every 10 min)
+                Task<List<ThermalHotspot>>? firmsTask = null;
+                if ((DateTime.UtcNow - _lastGroundScan).TotalMinutes >= 10 || _lastGroundScan == DateTime.MinValue)
+                {
+                    firmsTask = _ground.FetchFirmsDataAsync();
+                    tasks.Add(firmsTask);
+                }
+
+                // Equipment intelligence feeds — defense news RSS (every 10 min)
+                var equipIntelTask = _equipment.FetchEquipmentIntelAsync();
+                tasks.Add(equipIntelTask);
 
                 await Task.WhenAll(tasks);
 
@@ -150,6 +165,39 @@ namespace N01D.Overwatch
                     lstProxy.ItemsSource = proxy;
                     txtWarOpsCount.Text = $"{warEvents.Count} war actions detected";
                 }
+
+                // Process FIRMS thermal data — merge live satellite hotspots
+                if (firmsTask != null)
+                {
+                    var firmsHotspots = await firmsTask;
+                    _lastGroundScan = DateTime.UtcNow;
+                    if (firmsHotspots.Count > 0)
+                    {
+                        _ground.MergeFirmsHotspots(firmsHotspots);
+                        dgThermal.ItemsSource = _ground.GetAllHotspots();
+                        UpdateMapGround();
+                        var stats = _ground.GetStats();
+                        txtGroundStats.Text = $"{stats.ActiveFlocks} active flocks | {stats.ConflictZones} conflict zones ({stats.HighIntensityZones} HIGH) | " +
+                                              $"{stats.ThermalHotspots} thermal hotspots (LIVE) | {stats.Checkpoints} checkpoints/FOBs | " +
+                                              $"{stats.IdpCorridors} IDP corridors ({stats.TotalDisplaced:N0} displaced) | {stats.Countries} countries";
+                    }
+                }
+
+                // Process equipment intelligence feed
+                try
+                {
+                    var intel = await equipIntelTask;
+                    if (intel.Count > 0)
+                    {
+                        dgEquipmentIntel.ItemsSource = intel;
+                        var newCount = intel.Count(i => i.IsNew);
+                        var statsEq = _equipment.GetStats();
+                        txtEquipmentStats.Text = $"{statsEq.Countries} forces | {statsEq.TotalTypes} weapon systems | {statsEq.TotalActive:N0} active units | " +
+                                                 $"✈ {statsEq.Aircraft:N0} aircraft | 🛩 {statsEq.Drones:N0} drones | 🚢 {statsEq.Naval:N0} naval | 🚀 {statsEq.Missiles:N0} missiles | " +
+                                                 $"📡 {intel.Count} intel items" + (newCount > 0 ? $" ({newCount} NEW)" : "");
+                    }
+                }
+                catch { }
 
                 ApplyFilters();
                 UpdateAlertCount();
@@ -649,6 +697,7 @@ namespace N01D.Overwatch
                         <label class="layer-toggle"><input type="checkbox" id="togCheckpoints" checked onchange="toggleLayer('checkpoints')"> 🛑 CKP</label>
                         <label class="layer-toggle"><input type="checkbox" id="togConflict" checked onchange="toggleLayer('conflict')"> 💥 Conflict</label>
                         <label class="layer-toggle"><input type="checkbox" id="togCorridors" onchange="toggleLayer('corridors')"> 🏕 IDP</label>
+                        <label class="layer-toggle"><input type="checkbox" id="togMarket" onchange="toggleLayer('market')"> 📈 Market</label>
                         <label class="layer-toggle"><input type="checkbox" id="togEclipse" onchange="toggleLayer('eclipse')"> 🌑 Eclipse</label>
                         <label class="layer-toggle"><input type="checkbox" id="togHeatmap" onchange="toggleLayer('heatmap')"> 🔥 Density</label>
                     </div>
@@ -672,6 +721,7 @@ namespace N01D.Overwatch
                     <div class="stat-row"><span>Thermal:</span><span class="stat-val" id="statHotspots" style="color:#FF5555">0</span></div>
                     <div class="stat-row"><span>Missile sites:</span><span class="stat-val" id="statMissiles" style="color:#FF8833">0</span></div>
                     <div class="stat-row"><span>Defense:</span><span class="stat-val" id="statDefense" style="color:#33CCCC">0</span></div>
+                    <div class="stat-row"><span>Market zones:</span><span class="stat-val" id="statMarket" style="color:#33CC33">0</span></div>
                     <div class="stat-row"><span>Coverage:</span><span class="stat-val">3.2M km²</span></div>
                 </div>
 
@@ -735,6 +785,7 @@ namespace N01D.Overwatch
                     var checkpointLayer = L.layerGroup().addTo(map);
                     var conflictLayer = L.layerGroup().addTo(map);
                     var corridorLayer = L.layerGroup();
+                    var marketLayer = L.layerGroup();
 
                     var layers = {
                         events: eventLayer,
@@ -751,7 +802,8 @@ namespace N01D.Overwatch
                         hotspots: hotspotLayer,
                         checkpoints: checkpointLayer,
                         conflict: conflictLayer,
-                        corridors: corridorLayer
+                        corridors: corridorLayer,
+                        market: marketLayer
                     };
 
                     function toggleLayer(name) {
@@ -1231,6 +1283,47 @@ namespace N01D.Overwatch
                         });
 
                         document.getElementById('statEquipment').textContent = count;
+                    }
+
+                    // ═══════════════════════════════════════
+                    //  MARKET IMPACT ZONES (called from C#)
+                    // ═══════════════════════════════════════
+
+                    function updateMarketImpacts(data) {
+                        marketLayer.clearLayers();
+                        var count = 0;
+
+                        data.forEach(function(m) {
+                            count++;
+                            var color = m.sev >= 3 ? '#EE3333' : (m.sev >= 2 ? '#FF8833' : (m.sev >= 1 ? '#DDCC33' : '#6A6A80'));
+                            var radius = m.sev >= 3 ? 80000 : (m.sev >= 2 ? 60000 : 40000);
+
+                            L.circle([m.lat, m.lon], {
+                                radius: radius, color: color, fillColor: color,
+                                fillOpacity: 0.06, weight: 1.5, dashArray: '6,4'
+                            }).addTo(marketLayer);
+
+                            var mIcon = L.divIcon({
+                                className: 'market-marker',
+                                html: '<div style="font-size:16px;text-shadow:0 0 8px ' + color + '80" title="' + m.name + '">' + m.dir + '</div>',
+                                iconSize: [18, 18], iconAnchor: [9, 9]
+                            });
+                            var marker = L.marker([m.lat, m.lon], { icon: mIcon });
+
+                            var popupHtml = '<div class="event-popup">' +
+                                '<div class="popup-header" style="background:' + color + '22;color:' + color + ';border-bottom:1px solid ' + color + '44">' +
+                                m.dir + ' ' + m.name + '</div>' +
+                                '<div class="popup-body">' +
+                                '<div style="margin-bottom:4px"><span class="sev-badge" style="background:' + color + '44;color:' + color + ';border:1px solid ' + color + '66">' + m.sector + '</span></div>' +
+                                '<div style="font-size:11px;color:#FF8833">Trigger: ' + m.trigger + '</div>' +
+                                '<div style="margin-top:4px;font-size:10px;color:#33CCCC">Assets: ' + m.assets + '</div>' +
+                                '</div></div>';
+
+                            marker.bindPopup(popupHtml, { maxWidth: 420, className: 'dark-popup' });
+                            marketLayer.addLayer(marker);
+                        });
+
+                        document.getElementById('statMarket').textContent = count;
                     }
 
                     // ═══════════════════════════════════════
@@ -2198,6 +2291,95 @@ namespace N01D.Overwatch
             }
         }
 
+        // ═══════════════════════════════════════════
+        //  WAR ECONOMY / MARKET IMPACTS
+        // ═══════════════════════════════════════════
+
+        private void LoadMarketData()
+        {
+            dgMarketImpacts.ItemsSource = _market.GetAllImpacts();
+            dgCommodities.ItemsSource = _market.GetAllCommodities();
+            dgDefenseStocks.ItemsSource = _market.GetAllDefenseStocks();
+            lstMarketAlerts.ItemsSource = _market.GetAllAlerts();
+            dgSanctions.ItemsSource = _market.GetAllSanctions();
+            dgTradeFeeds.ItemsSource = _market.GetAllFeeds();
+
+            var stats = _market.GetStats();
+            txtMarketStats.Text = $"📈 {stats.TotalImpacts} impacts ({stats.CriticalImpacts} CRITICAL, {stats.HighImpacts} HIGH) | " +
+                                  $"{stats.Sectors} sectors | {stats.Commodities} commodities | {stats.DefenseStocks} defense stocks | " +
+                                  $"🚨 {stats.ActiveAlerts} alerts | 🏛 {stats.Sanctions} sanctions | 📡 {stats.LiveFeeds} live feeds";
+        }
+
+        private void CmbMarketFilter_Changed(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_initialized) return;
+            if (cmbMarketFilter.SelectedItem is ComboBoxItem item)
+            {
+                var filter = item.Content?.ToString() ?? "ALL";
+                if (filter == "ALL")
+                    dgMarketImpacts.ItemsSource = _market.GetAllImpacts();
+                else if (Enum.TryParse<MarketSector>(filter.Replace(" ", ""), true, out var sector))
+                    dgMarketImpacts.ItemsSource = _market.GetImpactsBySector(sector);
+                else
+                    dgMarketImpacts.ItemsSource = _market.GetAllImpacts();
+            }
+        }
+
+        private void DgMarketImpacts_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (dgMarketImpacts.SelectedItem is MarketImpact impact)
+            {
+                txtMarketDetail.Text = $"{impact.SeverityDisplay}  {impact.DirectionDisplay}  {impact.SectorDisplay}\n\n" +
+                                       $"EVENT: {impact.Title}\n" +
+                                       $"TRIGGER: {impact.Trigger}\n\n" +
+                                       $"MARKET IMPACT:\n{impact.Impact}\n\n" +
+                                       $"ASSETS TO WATCH: {impact.Assets}\n\n" +
+                                       $"PROBABILITY: {impact.Probability}\n" +
+                                       $"TIME HORIZON: {impact.TimeHorizon}\n" +
+                                       $"REGION: {impact.Region}\n\n" +
+                                       $"HISTORICAL PRECEDENT:\n{impact.HistoricalPrecedent}";
+            }
+        }
+
+        private void BtnShowMarketOnMap_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                UpdateMapMarket();
+                tabMain.SelectedIndex = 1; // Switch to Map
+                webMap.CoreWebView2?.ExecuteScriptAsync("flyTo(30, 44, 4)");
+                txtStatus.Text = $"📈 Market impact zones displayed on map";
+            }
+            catch { }
+        }
+
+        private void UpdateMapMarket()
+        {
+            try
+            {
+                var data = _market.BuildImpactMapData();
+                webMap.CoreWebView2?.ExecuteScriptAsync($"updateMarketImpacts([{data}])");
+            }
+            catch { }
+        }
+
+        private void BtnOpenMarketLink_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.DataContext is DefenseStock stock && !string.IsNullOrEmpty(stock.LiveUrl))
+            {
+                try { Process.Start(new ProcessStartInfo(stock.LiveUrl) { UseShellExecute = true }); }
+                catch { }
+            }
+        }
+
+        private void BtnOpenTradeFeed_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.DataContext is TradeFeed feed && !string.IsNullOrEmpty(feed.Url))
+            {
+                try { Process.Start(new ProcessStartInfo(feed.Url) { UseShellExecute = true }); }
+                catch { }
+            }
+        }
 
 
         /// <summary>Opens a ground-eye view camera using Google Street View / Mapillary embed in a new WebView2 window.</summary>

@@ -475,6 +475,14 @@ namespace N01D.Overwatch.Services
         public List<ThermalHotspot> GetRecentHotspots(int hoursBack = 24) =>
             _hotspots.Where(h => h.DetectedUtc > DateTime.UtcNow.AddHours(-hoursBack)).ToList();
 
+        /// <summary>Merges live NASA FIRMS satellite hotspots into the tracking list, replacing older FIRMS entries.</summary>
+        public void MergeFirmsHotspots(List<ThermalHotspot> firmsData)
+        {
+            // Remove old FIRMS entries; keep manually-curated static hotspots
+            _hotspots.RemoveAll(h => h.Id.StartsWith("FIRMS-"));
+            _hotspots.AddRange(firmsData);
+        }
+
         public List<GroundCheckpoint> GetAllCheckpoints() => _checkpoints;
 
         public List<DisplacementCorridor> GetAllCorridors() => _idpCorridors;
