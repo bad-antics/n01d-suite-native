@@ -590,17 +590,21 @@ namespace N01D.Overwatch
                     .stat-row { display: flex; justify-content: space-between; margin: 3px 0; }
                     .stat-val { font-weight: bold; }
 
-                    /* Layer control */
+                    /* Layer control — collapsible, compact */
                     .layer-control {
                         position: absolute; top: 12px; left: 12px; z-index: 1000;
                         background: #080810ee; border: 1px solid #2A2A3E; border-radius: 4px;
-                        padding: 10px 14px; font-size: 10px; color: #D0D0D0;
-                        backdrop-filter: blur(8px);
+                        padding: 6px 10px; font-size: 9px; color: #D0D0D0;
+                        backdrop-filter: blur(8px); max-height: calc(100vh - 40px); overflow-y: auto;
+                        transition: all 0.2s ease;
                     }
-                    .layer-control h4 { margin: 0 0 6px 0; color: #33CCCC; font-size: 11px; }
-                    .layer-toggle { display: flex; align-items: center; gap: 6px; margin: 3px 0; cursor: pointer; }
+                    .layer-control.collapsed { padding: 6px 10px; }
+                    .layer-control.collapsed .layer-list { display: none; }
+                    .layer-control h4 { margin: 0 0 4px 0; color: #33CCCC; font-size: 10px; cursor: pointer; user-select: none; }
+                    .layer-control h4:hover { color: #3388FF; }
+                    .layer-toggle { display: flex; align-items: center; gap: 4px; margin: 1px 0; cursor: pointer; white-space: nowrap; }
                     .layer-toggle:hover { color: #3388FF; }
-                    .layer-toggle input { accent-color: #3388FF; }
+                    .layer-toggle input { accent-color: #3388FF; width: 12px; height: 12px; margin: 0; }
 
                     /* Pulse animation for critical markers */
                     @keyframes pulse-ring {
@@ -630,22 +634,24 @@ namespace N01D.Overwatch
 
                 <!-- Layer Control -->
                 <div class="layer-control" id="layerControl">
-                    <h4>⚙ LAYERS</h4>
-                    <label class="layer-toggle"><input type="checkbox" id="togEvents" checked onchange="toggleLayer('events')"> 📡 Events</label>
-                    <label class="layer-toggle"><input type="checkbox" id="togFlights" checked onchange="toggleLayer('flights')"> ✈ Flights</label>
-                    <label class="layer-toggle"><input type="checkbox" id="togZones" checked onchange="toggleLayer('zones')"> 🎯 Strategic Zones</label>
-                    <label class="layer-toggle"><input type="checkbox" id="togBases" checked onchange="toggleLayer('bases')"> 🏴 Military Bases</label>
-                    <label class="layer-toggle"><input type="checkbox" id="togPipelines" checked onchange="toggleLayer('pipelines')"> 🛢 Oil Routes</label>
-                    <label class="layer-toggle"><input type="checkbox" id="togMissiles" checked onchange="toggleLayer('missiles')"> 🚀 Missile Sites</label>
-                    <label class="layer-toggle"><input type="checkbox" id="togDefense" checked onchange="toggleLayer('defense')"> 🛡 Air Defense</label>
-                    <label class=""layer-toggle""><input type=""checkbox"" id=""togEquipment"" onchange=""toggleLayer('equipment')""> ⚙ Equipment</label>
-                    <label class=""layer-toggle""><input type=""checkbox"" id=""togGround"" checked onchange=""toggleLayer('ground')""> 🪖 Ground Flocks</label>
-                    <label class=""layer-toggle""><input type=""checkbox"" id=""togHotspots"" checked onchange=""toggleLayer('hotspots')""> 🔥 Thermal</label>
-                    <label class=""layer-toggle""><input type=""checkbox"" id=""togCheckpoints"" checked onchange=""toggleLayer('checkpoints')""> 🛑 Checkpoints</label>
-                    <label class=""layer-toggle""><input type=""checkbox"" id=""togConflict"" checked onchange=""toggleLayer('conflict')""> 💥 Conflict Zones</label>
-                    <label class=""layer-toggle""><input type=""checkbox"" id=""togCorridors"" onchange=""toggleLayer('corridors')""> 🏕 IDP Corridors</label>
-                    <label class=""layer-toggle""><input type=""checkbox"" id=""togEclipse"" onchange=""toggleLayer('eclipse')""> 🌑 Eclipse Paths</label>
-                    <label class="layer-toggle"><input type="checkbox" id="togHeatmap" onchange="toggleLayer('heatmap')"> 🔥 Event Density</label>
+                    <h4 onclick="document.getElementById('layerList').style.display=document.getElementById('layerList').style.display==='none'?'block':'none'">⚙ LAYERS ▾</h4>
+                    <div id="layerList" class="layer-list">
+                        <label class="layer-toggle"><input type="checkbox" id="togEvents" checked onchange="toggleLayer('events')"> 📡 Events</label>
+                        <label class="layer-toggle"><input type="checkbox" id="togFlights" checked onchange="toggleLayer('flights')"> ✈ Flights</label>
+                        <label class="layer-toggle"><input type="checkbox" id="togZones" checked onchange="toggleLayer('zones')"> 🎯 Zones</label>
+                        <label class="layer-toggle"><input type="checkbox" id="togBases" checked onchange="toggleLayer('bases')"> 🏴 Bases</label>
+                        <label class="layer-toggle"><input type="checkbox" id="togPipelines" checked onchange="toggleLayer('pipelines')"> 🛢 Oil</label>
+                        <label class="layer-toggle"><input type="checkbox" id="togMissiles" checked onchange="toggleLayer('missiles')"> 🚀 Missiles</label>
+                        <label class="layer-toggle"><input type="checkbox" id="togDefense" checked onchange="toggleLayer('defense')"> 🛡 ADS</label>
+                        <label class="layer-toggle"><input type="checkbox" id="togEquipment" onchange="toggleLayer('equipment')"> ⚙ Equipment</label>
+                        <label class="layer-toggle"><input type="checkbox" id="togGround" checked onchange="toggleLayer('ground')"> 🪖 Ground</label>
+                        <label class="layer-toggle"><input type="checkbox" id="togHotspots" checked onchange="toggleLayer('hotspots')"> 🔥 Thermal</label>
+                        <label class="layer-toggle"><input type="checkbox" id="togCheckpoints" checked onchange="toggleLayer('checkpoints')"> 🛑 CKP</label>
+                        <label class="layer-toggle"><input type="checkbox" id="togConflict" checked onchange="toggleLayer('conflict')"> 💥 Conflict</label>
+                        <label class="layer-toggle"><input type="checkbox" id="togCorridors" onchange="toggleLayer('corridors')"> 🏕 IDP</label>
+                        <label class="layer-toggle"><input type="checkbox" id="togEclipse" onchange="toggleLayer('eclipse')"> 🌑 Eclipse</label>
+                        <label class="layer-toggle"><input type="checkbox" id="togHeatmap" onchange="toggleLayer('heatmap')"> 🔥 Density</label>
+                    </div>
                 </div>
 
                 <!-- Live Status -->
@@ -660,14 +666,13 @@ namespace N01D.Overwatch
                     <div class="stat-row"><span>Events plotted:</span><span class="stat-val" id="statEvents">0</span></div>
                     <div class="stat-row"><span>Aircraft tracked:</span><span class="stat-val" id="statFlights">0</span></div>
                     <div class="stat-row"><span>Equipment assets:</span><span class="stat-val" id="statEquipment" style="color:#FF8833">0</span></div>
-                    <div class="stat-row"><span>Ground flocks:</span><span class="stat-val" id="statGround" style="color:#DDCC33">0</span></div>
-                    <div class="stat-row"><span>Critical zones:</span><span class="stat-val" id="statZones" style="color:#EE3333">5</span></div>
-                    <div class="stat-row"><span>Missile sites:</span><span class="stat-val" id="statMissiles" style="color:#FF8833">0</span></div>
-                    <div class="stat-row"><span>Defense systems:</span><span class="stat-val" id="statDefense" style="color:#33CCCC">0</span></div>
                     <div class="stat-row"><span>Ground flocks:</span><span class="stat-val" id="statFlocks" style="color:#33CC33">0</span></div>
+                    <div class="stat-row"><span>Critical zones:</span><span class="stat-val" id="statZones" style="color:#EE3333">5</span></div>
                     <div class="stat-row"><span>Conflict zones:</span><span class="stat-val" id="statConflict" style="color:#EE3333">0</span></div>
-                    <div class="stat-row"><span>Thermal hotspots:</span><span class="stat-val" id="statHotspots" style="color:#FF5555">0</span></div>
-                    <div class="stat-row"><span>Coverage area:</span><span class="stat-val">3.2M km²</span></div>
+                    <div class="stat-row"><span>Thermal:</span><span class="stat-val" id="statHotspots" style="color:#FF5555">0</span></div>
+                    <div class="stat-row"><span>Missile sites:</span><span class="stat-val" id="statMissiles" style="color:#FF8833">0</span></div>
+                    <div class="stat-row"><span>Defense:</span><span class="stat-val" id="statDefense" style="color:#33CCCC">0</span></div>
+                    <div class="stat-row"><span>Coverage:</span><span class="stat-val">3.2M km²</span></div>
                 </div>
 
                 <!-- Legend -->
@@ -690,12 +695,6 @@ namespace N01D.Overwatch
                     <div class="legend-item"><span class="legend-line" style="border-color:#FF333388;border-top-style:solid"></span> Conflict Zone</div>
                     <div class="legend-item"><span class="legend-line" style="border-color:#AA55FF;border-top-style:dashed"></span> IDP Corridor</div>
                     <div class="legend-item"><span class="legend-line" style="border-color:#DDCC33;border-top-style:dotted"></span> Eclipse Path</div>
-                    <h4 style="margin-top:10px">GROUND</h4>
-                    <div class="legend-item"><span class="legend-dot" style="background:#FF8833"></span> 🪖 Force Cluster</div>
-                    <div class="legend-item"><span class="legend-dot" style="background:#EE333388;border:2px dashed #EE3333"></span> 🎯 Conflict Zone</div>
-                    <div class="legend-item"><span class="legend-dot" style="background:#DDCC33;width:6px;height:6px"></span> 🔥 Thermal</div>
-                    <div class="legend-item"><span class="legend-dot" style="background:#33CCCC"></span> 🏴 Checkpoint</div>
-                    <div class="legend-item"><span class="legend-line" style="border-color:#AA55FF;border-top-style:dashed"></span> 🏕 IDP Corridor</div>
                 </div>
 
                 <script>
