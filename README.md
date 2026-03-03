@@ -12,13 +12,13 @@
 
 Native Windows WPF desktop tools with hacker aesthetics. 13 apps, one solution.
 
-**Flagship app: N01D Overwatch** — Real-time conflict intelligence dashboard with 82+ OSINT feeds, flight tracking, war ops monitoring, equipment OOB, warzone radio, missile defense mapping, and interactive tactical map. Get it standalone at https://github.com/bad-antics/n01d-overwatch
+**Flagship app: N01D Overwatch** — Real-time conflict intelligence dashboard with 82+ OSINT feeds, flight tracking, war ops monitoring, equipment OOB + live intel scanner, warzone radio, missile defense mapping, NASA satellite thermal detection, war economy market tracking (9 sectors), and interactive tactical map. Get it standalone at https://github.com/bad-antics/n01d-overwatch
 
 ---
 
 ## Tools Included (13 Apps)
 
-- **N01D-Overwatch** — Conflict intelligence dashboard — 82+ OSINT feeds, flight tracking, war ops, missile defense, equipment order of battle, warzone radio, eclipse warfare, interactive Leaflet.js map. Standalone repo: https://github.com/bad-antics/n01d-overwatch
+- **N01D-Overwatch** — Conflict intelligence dashboard — 82+ OSINT feeds, flight tracking, war ops, missile defense, equipment order of battle + live intel feed, warzone radio, eclipse warfare, ground thermal tracking (NASA FIRMS), war economy market impacts (9 sectors), interactive Leaflet.js map. Standalone repo: https://github.com/bad-antics/n01d-overwatch
 - **N01D-SysMon** — Real-time system monitor with CPU, memory, disk, network stats
 - **N01D-Notes** — Markdown note-taking with live preview
 - **N01D-Term** — Modern terminal emulator with tabs
