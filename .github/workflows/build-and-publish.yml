@@ -44,7 +44,7 @@ jobs:
             "N01D.SysMon", "N01D.Notes", "N01D.Term", "N01D.Forge",
             "N01D.Media", "N01D.Vault", "N01D.Pulse", "N01D.Calc",
             "N01D.Clip", "N01D.Cron", "N01D.Wipe", "N01D.Overwatch",
-            "N01D.Arcade"
+            "N01D.Arcade", "N01D.Hex", "N01D.Scan"
           )
           foreach ($app in $apps) {
             Write-Host "Publishing $app..."
@@ -152,6 +152,8 @@ jobs:
             | N01D-Cron | Task scheduler & cron manager |
             | N01D-Wipe | Secure file wipe (DoD 5220.22-M) |
             | N01D-Arcade | Arcade games with N01D theme |
+            | N01D-Hex | Binary hex editor with pattern search |
+            | N01D-Scan | Network port scanner + banner grabber |
 
             ### NuGet
             The shared theme library is available on NuGet:

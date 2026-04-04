@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <AssemblyName>N01D.Scan</AssemblyName>
+    <RootNamespace>N01D.Scan</RootNamespace>
+    <Version>1.0.0</Version>
+    <Authors>bad-antics</Authors>
+    <Description>N01D.Scan — network port scanner and host discovery</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\N01D.Shared\N01D.Shared.csproj" />
+  </ItemGroup>
+</Project>

@@ -31,6 +31,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "N01D.Overwatch", "N01D.Over
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "N01D.Arcade", "N01D.Arcade\N01D.Arcade.csproj", "{529CBD17-8DB5-4949-9DAE-63BF03670EF3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "N01D.Hex", "N01D.Hex\N01D.Hex.csproj", "{7A2B3C4D-E5F6-7890-ABCD-EF0123456789}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "N01D.Scan", "N01D.Scan\N01D.Scan.csproj", "{8B3C4D5E-F6A7-8901-BCDE-F01234567890}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "N01D.Hex", "N01D.Hex\\N01D.Hex.csproj", "{7A2B3C4D-E5F6-7890-ABCD-EF0123456789}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "N01D.Scan", "N01D.Scan\\N01D.Scan.csproj", "{8B3C4D5E-F6A7-8901-BCDE-F01234567890}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

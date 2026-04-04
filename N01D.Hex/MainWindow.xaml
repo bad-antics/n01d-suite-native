@@ -1,0 +1,138 @@
+<Window x:Class="N01D.Hex.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="N01D.Hex" Height="720" Width="1100"
+        Background="{StaticResource N01DBackgroundBrush}"
+        Foreground="{StaticResource N01DTextBrush}"
+        FontFamily="{StaticResource N01DMonoFont}"
+        Style="{StaticResource N01DWindow}">
+    <Window.InputBindings>
+        <KeyBinding Key="O" Modifiers="Ctrl" Command="{Binding}" CommandParameter="open"/>
+        <KeyBinding Key="S" Modifiers="Ctrl" Command="{Binding}" CommandParameter="save"/>
+        <KeyBinding Key="G" Modifiers="Ctrl" Command="{Binding}" CommandParameter="goto"/>
+        <KeyBinding Key="F" Modifiers="Ctrl" Command="{Binding}" CommandParameter="find"/>
+    </Window.InputBindings>
+
+    <DockPanel>
+        <!-- Toolbar -->
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal"
+                    Background="{StaticResource N01DBackgroundAltBrush}"
+                    Margin="0,0,0,2">
+            <Button x:Name="btnOpen" Content="[ OPEN ]"     Margin="4,3" Padding="8,3" Click="BtnOpen_Click"/>
+            <Button x:Name="btnSave" Content="[ SAVE ]"     Margin="2,3" Padding="8,3" Click="BtnSave_Click" IsEnabled="False"/>
+            <Button x:Name="btnSaveAs" Content="[ SAVE AS ]" Margin="2,3" Padding="8,3" Click="BtnSaveAs_Click" IsEnabled="False"/>
+            <Separator Width="1" Margin="4,2" Background="{StaticResource N01DBorderBrush}"/>
+            <Button x:Name="btnGoto" Content="[ GOTO ]"  Margin="2,3" Padding="8,3" Click="BtnGoto_Click"/>
+            <Button x:Name="btnFind" Content="[ FIND ]"  Margin="2,3" Padding="8,3" Click="BtnFind_Click"/>
+            <Separator Width="1" Margin="4,2" Background="{StaticResource N01DBorderBrush}"/>
+            <TextBlock Text="Pattern:" VerticalAlignment="Center" Margin="4,0" Foreground="{StaticResource N01DTextDimBrush}"/>
+            <ComboBox x:Name="cmbPattern" Width="120" Margin="2,3"
+                      Background="{StaticResource N01DBackgroundBrush}"
+                      Foreground="{StaticResource N01DTextBrush}"
+                      BorderBrush="{StaticResource N01DBorderBrush}"
+                      SelectionChanged="CmbPattern_SelectionChanged">
+                <ComboBoxItem Content="None" IsSelected="True"/>
+                <ComboBoxItem Content="PNG Header"/>
+                <ComboBoxItem Content="JPEG Header"/>
+                <ComboBoxItem Content="ELF Header"/>
+                <ComboBoxItem Content="PE Header"/>
+                <ComboBoxItem Content="ZIP Header"/>
+                <ComboBoxItem Content="Null Bytes"/>
+            </ComboBox>
+        </StackPanel>
+
+        <!-- Status bar -->
+        <StatusBar DockPanel.Dock="Bottom"
+                   Background="{StaticResource N01DBackgroundAltBrush}">
+            <StatusBarItem>
+                <TextBlock x:Name="lblOffset" Text="Offset: 0x00000000"
+                           Foreground="{StaticResource N01DPrimaryBrush}" FontSize="12"/>
+            </StatusBarItem>
+            <Separator/>
+            <StatusBarItem>
+                <TextBlock x:Name="lblSize" Text="Size: 0 bytes"
+                           Foreground="{StaticResource N01DTextDimBrush}" FontSize="12"/>
+            </StatusBarItem>
+            <Separator/>
+            <StatusBarItem>
+                <TextBlock x:Name="lblSelection" Text="Sel: none"
+                           Foreground="{StaticResource N01DSecondaryBrush}" FontSize="12"/>
+            </StatusBarItem>
+            <Separator/>
+            <StatusBarItem>
+                <TextBlock x:Name="lblStatus" Text="No file loaded"
+                           Foreground="{StaticResource N01DTextDimBrush}" FontSize="12"/>
+            </StatusBarItem>
+        </StatusBar>
+
+        <!-- Find bar -->
+        <Grid x:Name="findBar" DockPanel.Dock="Bottom" Visibility="Collapsed"
+              Background="{StaticResource N01DBackgroundAltBrush}" Margin="0,2,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="Find (hex):" VerticalAlignment="Center" Margin="8,3"/>
+            <TextBox  Grid.Column="1" x:Name="txtFind" Margin="4,3" Padding="4,2"
+                      Background="{StaticResource N01DBackgroundBrush}"
+                      Foreground="{StaticResource N01DPrimaryBrush}"
+                      BorderBrush="{StaticResource N01DBorderBrush}"
+                      KeyDown="TxtFind_KeyDown"/>
+            <Button Grid.Column="2" Content="[ PREV ]" Margin="2,3" Padding="6,2" Click="BtnFindPrev_Click"/>
+            <Button Grid.Column="3" Content="[ NEXT ]" Margin="2,3" Padding="6,2" Click="BtnFindNext_Click"/>
+            <TextBlock Grid.Column="4" x:Name="lblFindResult" Text="" VerticalAlignment="Center" Margin="8,0"
+                       Foreground="{StaticResource N01DSecondaryBrush}"/>
+            <Button Grid.Column="5" Content="X" Margin="4,3" Padding="4,2" Click="BtnFindClose_Click"/>
+        </Grid>
+
+        <!-- Hex view -->
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" MinWidth="80"/>   <!-- offset column -->
+                <ColumnDefinition Width="*"/>                    <!-- hex bytes -->
+                <ColumnDefinition Width="160"/>                  <!-- ASCII -->
+            </Grid.ColumnDefinitions>
+
+            <!-- Offset column -->
+            <ScrollViewer x:Name="svOffset" Grid.Column="0"
+                          VerticalScrollBarVisibility="Hidden"
+                          HorizontalScrollBarVisibility="Disabled"
+                          Background="{StaticResource N01DBackgroundAltBrush}">
+                <TextBlock x:Name="txtOffsets" Padding="6,4"
+                           Foreground="{StaticResource N01DTextDimBrush}"
+                           FontSize="13" LineHeight="18"/>
+            </ScrollViewer>
+
+            <!-- Hex bytes -->
+            <ScrollViewer x:Name="svHex" Grid.Column="1"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Auto"
+                          ScrollChanged="SvHex_ScrollChanged">
+                <TextBox x:Name="txtHex" IsReadOnly="False" AcceptsReturn="False"
+                         Padding="6,4" FontSize="13" LineHeight="18"
+                         Background="{StaticResource N01DBackgroundBrush}"
+                         Foreground="{StaticResource N01DPrimaryBrush}"
+                         CaretBrush="{StaticResource N01DPrimaryBrush}"
+                         SelectionBrush="{StaticResource N01DSecondaryBrush}"
+                         BorderThickness="0"
+                         TextChanged="TxtHex_TextChanged"
+                         SelectionChanged="TxtHex_SelectionChanged"/>
+            </ScrollViewer>
+
+            <!-- ASCII panel -->
+            <ScrollViewer x:Name="svAscii" Grid.Column="2"
+                          VerticalScrollBarVisibility="Hidden"
+                          HorizontalScrollBarVisibility="Disabled"
+                          Background="{StaticResource N01DBackgroundAltBrush}">
+                <TextBlock x:Name="txtAscii" Padding="6,4"
+                           FontSize="13" LineHeight="18"
+                           Foreground="{StaticResource N01DTextBrush}"/>
+            </ScrollViewer>
+        </Grid>
+    </DockPanel>
+</Window>

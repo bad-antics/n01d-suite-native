@@ -1,0 +1,54 @@
+name: PR Build Check
+
+on:
+  pull_request:
+    branches: [ main, dev ]
+  push:
+    branches: [ dev ]
+
+env:
+  DOTNET_VERSION: '8.0.x'
+
+jobs:
+  build-check:
+    name: Build & Analyze
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        run: dotnet restore N01DSuite.sln
+
+      - name: Build (Debug)
+        run: dotnet build N01DSuite.sln --configuration Debug --no-restore
+
+      - name: Build (Release)
+        run: dotnet build N01DSuite.sln --configuration Release --no-restore
+
+      - name: Run tests (if any)
+        run: |
+          $testProjects = Get-ChildItem -Recurse -Filter "*.Tests.csproj"
+          if ($testProjects.Count -gt 0) {
+            dotnet test N01DSuite.sln --configuration Release --no-build --verbosity normal
+          } else {
+            Write-Host "No test projects found — skipping"
+          }
+        shell: pwsh
+
+      - name: Check for obvious issues
+        shell: pwsh
+        run: |
+          $errors = @()
+          # Check for TODO/FIXME/HACK markers (informational only)
+          $markers = Select-String -Path "**/*.cs" -Pattern "TODO|FIXME|HACK" -Recurse
+          if ($markers) {
+            Write-Host "Info: Found $($markers.Count) TODO/FIXME/HACK markers"
+            $markers | ForEach-Object { Write-Host "  $($_.Filename):$($_.LineNumber) — $($_.Line.Trim())" }
+          }
+          Write-Host "Build check passed"
