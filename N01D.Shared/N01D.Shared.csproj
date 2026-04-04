@@ -4,5 +4,25 @@
     <UseWPF>true</UseWPF>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+
+    <!-- NuGet package metadata -->
+    <PackageId>N01D.Shared</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>bad-antics</Authors>
+    <Company>bad-antics</Company>
+    <Description>N01D Suite shared WPF theme library — cyberpunk hacker aesthetic (N01D color palette, brushes, styles) for .NET 8 WPF applications.</Description>
+    <PackageTags>wpf;theme;hacker;cyberpunk;n01d;ui;xaml;windows</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/bad-antics/n01d-suite-native</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/bad-antics/n01d-suite-native</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\\README.md" Pack="true" PackagePath="\"/>
+  </ItemGroup>
 </Project>

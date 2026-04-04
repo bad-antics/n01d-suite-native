@@ -1,0 +1,160 @@
+name: Build & Publish N01D Suite
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      publish_nuget:
+        description: 'Publish N01D.Shared to NuGet'
+        required: false
+        default: 'false'
+        type: boolean
+
+env:
+  DOTNET_VERSION: '8.0.x'
+
+jobs:
+  # ──────────────────────────────────────────
+  # Build all WPF apps (Windows only)
+  # ──────────────────────────────────────────
+  build:
+    name: Build all N01D apps
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        run: dotnet restore N01DSuite.sln
+
+      - name: Build solution
+        run: dotnet build N01DSuite.sln --configuration Release --no-restore
+
+      - name: Publish each app as self-contained Windows x64
+        shell: pwsh
+        run: |
+          $apps = @(
+            "N01D.SysMon", "N01D.Notes", "N01D.Term", "N01D.Forge",
+            "N01D.Media", "N01D.Vault", "N01D.Pulse", "N01D.Calc",
+            "N01D.Clip", "N01D.Cron", "N01D.Wipe", "N01D.Overwatch",
+            "N01D.Arcade"
+          )
+          foreach ($app in $apps) {
+            Write-Host "Publishing $app..."
+            dotnet publish "$app/$app.csproj" `
+              --configuration Release `
+              --runtime win-x64 `
+              --self-contained true `
+              -p:PublishSingleFile=true `
+              --output "publish/$app"
+          }
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: n01d-suite-apps
+          path: publish/
+          retention-days: 30
+
+  # ──────────────────────────────────────────
+  # Publish N01D.Shared theme library to NuGet
+  # ──────────────────────────────────────────
+  publish-nuget:
+    name: Publish N01D.Shared to NuGet
+    runs-on: windows-latest
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v') || github.event.inputs.publish_nuget == 'true'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore N01D.Shared
+        run: dotnet restore N01D.Shared/N01D.Shared.csproj
+
+      - name: Pack N01D.Shared
+        run: |
+          dotnet pack N01D.Shared/N01D.Shared.csproj `
+            --configuration Release `
+            --no-restore `
+            --output nupkgs
+
+      - name: Push to NuGet.org
+        run: |
+          dotnet nuget push nupkgs/*.nupkg `
+            --api-key ${{ secrets.NUGET_API_KEY }} `
+            --source https://api.nuget.org/v3/index.json `
+            --skip-duplicate
+
+  # ──────────────────────────────────────────
+  # Create GitHub Release with app binaries
+  # ──────────────────────────────────────────
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: n01d-suite-apps
+          path: publish/
+
+      - name: Zip each app
+        run: |
+          cd publish
+          for dir in */; do
+            app="${dir%/}"
+            zip -r "${app}-win-x64.zip" "$dir"
+            echo "Created ${app}-win-x64.zip"
+          done
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: N01D Suite ${{ github.ref_name }}
+          body: |
+            ## N01D Suite ${{ github.ref_name }}
+
+            Native Windows desktop tools with hacker aesthetics. 13 apps, one release.
+
+            ### Apps included
+            | App | Description |
+            |---|---|
+            | N01D-Overwatch | Conflict intelligence dashboard — 82+ OSINT feeds |
+            | N01D-SysMon | Real-time system monitor (CPU/RAM/disk/network) |
+            | N01D-Notes | Markdown editor with live preview |
+            | N01D-Term | Terminal emulator with tabs |
+            | N01D-Forge | Code snippet forge & template generator |
+            | N01D-Media | Media player and file manager |
+            | N01D-Vault | AES-256 encrypted password manager |
+            | N01D-Pulse | Network pulse monitor & port scanner |
+            | N01D-Calc | Hacker calculator (hex/bin/dec/oct + bitwise) |
+            | N01D-Clip | Clipboard history manager |
+            | N01D-Cron | Task scheduler & cron manager |
+            | N01D-Wipe | Secure file wipe (DoD 5220.22-M) |
+            | N01D-Arcade | Arcade games with N01D theme |
+
+            ### NuGet
+            The shared theme library is available on NuGet:
+            ```
+            dotnet add package N01D.Shared
+            ```
+          files: publish/*.zip
+          draft: false
+          prerelease: false
